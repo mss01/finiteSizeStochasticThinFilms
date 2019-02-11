@@ -13,7 +13,7 @@ set(0, 'defaulttextInterpreter','latex');
 R_film = [30 35 40 50 60 65 70 75 80 85 90 100 115 150 200 300 400 500 600 700 800 900 1000];   % radius of the film
 % R_film = [30];
 R_f = R_film.*10^-6;              % in m
-h0_init = 500e-9;                 % initial film height in m
+h0_init = 300e-9;                 % initial film height in m
 A_vw = 1.25e-21;                  % Hamaker constant
 gam = 0.034;                      % surface tension
 Rc = 1.8e-3;                      % radius of capillary

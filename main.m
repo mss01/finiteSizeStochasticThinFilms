@@ -1,4 +1,4 @@
-function main(R_f, h0_init, A_vw, gam, Rc, visc, L_flat, N_flat, deltaX, deltaT, transitionLength, h_drain_start, h_drain_end, h_critical_start,...
+function main(filmConfiguration, R_f, h0_init, A_vw, gam, Rc, visc, L_flat, N_flat, deltaX, deltaT, transitionLength, h_drain_start, h_drain_end, h_critical_start,...
                 h_critical_end, t_cr_dimensional, res_limit, ctimestep, Tmp, L_curv, endTime, seN, N_Reals, animationSkip, ...
                 startRealization, hJoyeStart, hJoyeEnd)
 
@@ -12,7 +12,7 @@ t_cr = t_cr_dimensional./t_scale;
 
 %% simulation set-up
 
-[h x] = initialProfile(kappa,L_flat,L_curv,transitionLength,deltaX);  
+[h x] = initialProfile(kappa,L_flat,L_curv,transitionLength,deltaX, filmConfiguration);  
 L = 2*(L_curv + L_flat);   % total length of the film (curved+flat)
 N = length(x) - 1;   %  -1 (to keep the notion consistent with N being the number of intervals and not the number of grid points);  
 gx = gx_generator(N,L,x);  % generates a matrix that is going to be used when we finally implement noise
@@ -97,7 +97,7 @@ else
         A(h_adjusted*(h_adjusted-1))=-2;
         %% call the solver
 
-        t_rupt(m) = nonFlatFilms_finite_domain_smooth(L_flat,transitionLength,L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN);
+        t_rupt(m) = nonFlatFilms_finite_domain_smooth(filmConfiguration, L_flat,transitionLength,L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN);
         
         reali_series(m) = m;
         realization = realization + 1;
@@ -111,7 +111,7 @@ end
 filename = ['data_', 'kappa_',num2str(kappa),'_Lf_',num2str(L),'_N_',num2str(N), '_Tmp_', num2str(Tmp),'.mat'];
 save(filename)
 
-postProc_det(R_f, L_flat, L_curv, transitionLength, deltaX, deltaT, kappa, seN, animationSkip, ...
+postProc_det(filmConfiguration, R_f, L_flat, L_curv, transitionLength, deltaX, deltaT, kappa, seN, animationSkip, ...
     h_drain_start, h_drain_end, h_critical_start, h_critical_end, t_cr, res_limit, hJoyeStart, hJoyeEnd, h0_init, Rc);
 
 

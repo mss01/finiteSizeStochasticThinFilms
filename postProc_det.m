@@ -1,4 +1,4 @@
-function postProc_det(R_f, L_flat, L_curv, transitionLength, deltaX, deltaT, kappa, seN, animationSkip, h_drain_start, h_drain_end, h_critical_start, ...
+function postProc_det(filmConfiguration, R_f, L_flat, L_curv, transitionLength, deltaX, deltaT, kappa, seN, animationSkip, h_drain_start, h_drain_end, h_critical_start, ...
                         h_critical_end, t_cr, res_limit, hJoyeStart, hJoyeEnd, h0_init, Rc);
 
 tic
@@ -16,7 +16,7 @@ last = 0;
 %% simulation set up
     
 L = 2*(L_curv + L_flat);                                    % total length of the film (curved+flat)
-[h x] = initialProfile(kappa,L_flat,L_curv,transitionLength,deltaX);       % get the initial conditions
+[h x] = initialProfile(kappa,L_flat,L_curv,transitionLength,deltaX, filmConfiguration);       % get the initial conditions
 tt = seN*deltaT;                                            % the rate at which files were saved
 cr_thickness = 0.627*kappa^(-2/7);                          % theoretical prediction of critical thickness  
 
@@ -34,7 +34,7 @@ cr_thickness = 0.627*kappa^(-2/7);                          % theoretical predic
     joyeAnalysis(hJoyeStart, hJoyeEnd, h_min, h_centre_j, deltaT, seN, t_store, kappa, L_flat, R_f, h0_init, Rc);
                         
 save('workspace_deterministic_t_cr.mat')
-makeAnimation_det(animationSkip,kappa, L_flat, L_curv, transitionLength,deltaX, h_store, t_store);
+makeAnimation_det(filmConfiguration, animationSkip,kappa, L_flat, L_curv, transitionLength,deltaX, h_store, t_store);
 
 toc
 

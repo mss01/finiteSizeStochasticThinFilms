@@ -1,6 +1,5 @@
-function t_rupt = nonFlatFilms_finite_domain_smooth(L_flat,transitionLength,L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN);
+function t_rupt = nonFlatFilms_finite_domain_smooth(filmConfiguration, L_flat,transitionLength,L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN);
 
-%%%----------- Setting up the initial conditions ------------%%%
 
 tic
 
@@ -45,9 +44,10 @@ tic
 
 
 
-%%
+%%%%%----------- Setting up the initial conditions ------------%%%%%
 
-[h x] = initialProfile(kappa,L_flat,L_curv,transitionLength,deltaX);
+
+[h x] = initialProfile(kappa,L_flat,L_curv,transitionLength,deltaX, filmConfiguration);
 p1 = deltaT/(deltaX^2);            % parameter for the explicit part (disj press)
 p2 = deltaT/(deltaX^4);            % parameter for the implicit part (surf tension)
 p3 = 1/(deltaX)*sqrt(2*deltaT*Tmp);     % parameter for the noise term, also explicit

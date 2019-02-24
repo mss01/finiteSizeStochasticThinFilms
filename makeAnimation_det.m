@@ -1,6 +1,6 @@
-function makeAnimation_det(animationSkip,kappa, L_flat, L_curv, transitionLength,deltaX, h_store, t_store)
+function makeAnimation_det(filmConfiguration, animationSkip,kappa, L_flat, L_curv, transitionLength,deltaX, h_store, t_store)
 
-[h x] = initialProfile(kappa,L_flat,L_curv,transitionLength,deltaX);
+[h x] = initialProfile(kappa,L_flat,L_curv,transitionLength,deltaX, filmConfiguration);
 h_all = [h h_store];
 t = [0 t_store];                    % corresponds to each time step, including the initial time step                    
 formatSpec = 't = %0.3e,';          % to show time steps

@@ -9,8 +9,8 @@ set(groot, 'defaultAxesTickLabelInterpreter','latex');
 set(groot, 'defaultLegendInterpreter','latex');
 set(0, 'defaulttextInterpreter','latex');
 
-% filmConfiguration = 'flatFilms_PBC';
-filmConfiguration = 'semiInfiniteNonFlatFilms';
+filmConfiguration = 'flatFilms_PBC';
+% filmConfiguration = 'semiInfiniteNonFlatFilms';
 % filmConfiguration = 'finiteSizedNonFlatFilms';
 
 switch filmConfiguration
@@ -26,11 +26,11 @@ switch filmConfiguration
         deltaT = deltaX^ctimestep;
         endTime = 150;
         seN = 20;
-        N_Reals = 1;                        % number of realizations
-        startRealization = 2;
+        N_Reals = 2;                        % number of realizations
+        startRealization = 1;
 
         
-        Tmp = 0;
+        Tmp = 0.001;
         [h x] = initialProfile(kappa,L_flat,L_curv,transitionLength,deltaX, filmConfiguration);
     case 'semiInfiniteNonFlatFilms'
         kappa = 0.1;

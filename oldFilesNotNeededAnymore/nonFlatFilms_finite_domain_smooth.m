@@ -1,4 +1,4 @@
-function t_rupt = nonFlatFilms_finite_domain_smooth(filmConfiguration, L_flat,transitionLength,L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN);
+function t_rupt = filmSolver(filmConfiguration, L_flat,transitionLength,L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN);
 
 
 tic

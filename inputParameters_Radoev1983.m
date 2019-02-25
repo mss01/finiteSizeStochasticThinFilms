@@ -10,23 +10,24 @@ set(groot, 'defaultLegendInterpreter','latex');
 set(0, 'defaulttextInterpreter','latex');
 
 % filmConfiguration = 'flatFilms_PBC';
-% filmConfiguration = 'semiInfiniteNonFlatFilms';
-filmConfiguration = 'finiteSizedNonFlatFilms';
+filmConfiguration = 'semiInfiniteNonFlatFilms';
+% filmConfiguration = 'finiteSizedNonFlatFilms';
 
 switch filmConfiguration
     case 'flatFilms_PBC' 
         kappa = 0;
+        transitionLength = 0;
         L_flat = 240;
         L_curv = 0;
-        transitionLength = 0;
+        
         deltaX = 0.05;
         N = (L_flat+L_curv)./deltaX;
         ctimestep = 2.75;
+        deltaT = deltaX^ctimestep;
         Tmp = 0.00;
         [h x] = initialProfile(kappa,L_flat,L_curv,transitionLength,deltaX, filmConfiguration);
-        plot(x,h)
     case 'semiInfiniteNonFlatFilms'
-        kappa = 0.001;
+        kappa = 0.00001;
         L_flat = 240;
         L_curv = 300;
         transitionLength = 1./sqrt(2*kappa);
@@ -35,7 +36,6 @@ switch filmConfiguration
         ctimestep = 2.75;
         Tmp = 0.00;
         [h x] = initialProfile(kappa,L_flat,L_curv,transitionLength,deltaX, filmConfiguration);
-        plot(x,h)
     case 'finiteSizedNonFlatFilms'
         %% raw conditions from the paper
         R_film = [20 25 30 35 40 50 60 65 70 75 80 85 90 100 115 150 200 300 400 500 600 700 800 900 1000];   % radius of the film
@@ -101,25 +101,18 @@ switch filmConfiguration
                 break;
             end
         end
-
-
-        %% test the first film length
-
+        
+        %% plot the first film length
         [h x] = initialProfile(kappa,L_flat(1),L_curv,transitionLength,deltaX(1),filmConfiguration);
         plot(x,h,'o')
         ylim([0.95 5])
-
+        
         %% parent folder
-
+        
         mk = strcat('h0_',num2str(h0_init*10^9),'nm','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc));
         mkdir(mk);
         cd(mk);
-
-
-        %% start simulations for different radii of films
-
-
-        for i = 1:length(R_film)
+        for i = 1:length(L_flat)
             str1{i} = strcat('Rf_', num2str(R_film(i)),'_mu_m');
             mkdir(str1{i});
             path_dest{i} = strcat('./', num2str(str1{i}));
@@ -127,16 +120,43 @@ switch filmConfiguration
             copyfile('../*.m', destinatn)
             run_mainFiles{i} = strcat('./',num2str(str1{i}));
             cd(run_mainFiles{i})
-            main(filmConfiguration, R_f(i), h0_init, A_vw, gam, Rc, visc, L_flat(i), N_flat(i), deltaX(i), deltaT(i), transitionLength, h_drain_start, h_drain_end, h_critical_start,...
-                        h_critical_end, t_cr_dimensional, res_limit, ctimestep, Tmp, L_curv, endTime, seN,...
-                        N_Reals, animationSkip, startRealization, hJoyeStart, hJoyeEnd)
+            main_finiteSizedFilms(filmConfiguration, R_f(i), h0_init, A_vw, gam, Rc, visc, L_flat(i), N_flat(i), deltaX(i), deltaT(i), transitionLength, h_drain_start, h_drain_end, h_critical_start,...
+                h_critical_end, t_cr_dimensional, res_limit, ctimestep, Tmp, L_curv, endTime, seN,...
+                N_Reals, animationSkip, startRealization, hJoyeStart, hJoyeEnd)
+            
             cd ..
+            fileToBeSaved = strcat('workspace_','Rf_',num2str(min(R_film)),'_to_',num2str(max(R_film)),'.mat');
+            save('fileToBeSaved')
         end
-
-        fileToBeSaved = strcat('workspace_','Rf_',num2str(min(R_film)),'_to_',num2str(max(R_film)),'.mat');
-        save('workspaceInputParameters.mat')
-         
 end
+        
+%% start simulations for different radii of films
+
+for i = 1:length(L_flat)
+    switch filmConfiguration
+        case {'flatFilms_PBC','semiInfiniteNonFlatFilms'}
+            str1{i} = strcat('theta_', num2str(Tmp));
+            mkdir(str1{i});
+            cd(str1{1});
+            str2{i} = strcat('kappa_', num2str(kappa));
+            mkdir(str2{i});
+            path_dest{i} = strcat('./', num2str(str2{i}));
+            destinatn = path_dest{i};
+            copyfile('../*.m', destinatn)
+            run_mainFiles{i} = strcat('./',num2str(str2{i}));
+            cd(run_mainFiles{i})
+            main_flatOrSemiInfiniteFilms(filmConfiguration, R_f(i), h0_init, A_vw, gam, Rc, visc, L_flat(i), N_flat(i), deltaX(i), deltaT(i), transitionLength, h_drain_start, h_drain_end, h_critical_start,...
+                h_critical_end, t_cr_dimensional, res_limit, ctimestep, Tmp, L_curv, endTime, seN,...
+                N_Reals, animationSkip, startRealization, hJoyeStart, hJoyeEnd)
+            cd ..
+    end
+end
+
+save('workspaceInputParameters.mat')
+
+cd ..
+         
+
 
 
 toc

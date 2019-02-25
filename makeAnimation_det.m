@@ -28,7 +28,7 @@ for i = 1:animationSkip:q-1
     Y = h_all(:,i);
     area(x',Y)
     ylim([0 1.5])
-    xlim([-1.5*L_flat 1.5*L_flat])
+    xlim([-2*L_flat 2*L_flat])
     xlabel('x [-]','Fontsize',16)
     ylabel('h [-]','Fontsize',16)
     set(gca,'FontSize',18)

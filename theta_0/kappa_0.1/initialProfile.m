@@ -36,7 +36,7 @@ switch filmConfiguration
         h_right = fliplr(h_left);
         if x_left(end) == 0
             h_right(1) = [];
-            h = [h_left h_right];
+            h = [h_left h_right]';
         else
             h = [h_left 1 h_right];
         end

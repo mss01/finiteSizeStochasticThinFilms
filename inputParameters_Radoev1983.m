@@ -9,13 +9,23 @@ set(groot, 'defaultAxesTickLabelInterpreter','latex');
 set(groot, 'defaultLegendInterpreter','latex');
 set(0, 'defaulttextInterpreter','latex');
 
-filmConfiguration = 'flatFilms_PBC';
+%% Select the film configuration that you want to simulate
+
+%%%% flat films with periodic boundary conditions %%%%%%
+% filmConfiguration = 'flatFilms_PBC';    
+
+%%%%  semi-infinite films with far field boundary conditions %%%%%%
 % filmConfiguration = 'semiInfiniteNonFlatFilms';
-% filmConfiguration = 'finiteSizedNonFlatFilms';
+
+%%%%% finite sized films with curvature on both sides  %%%%%%
+filmConfiguration = 'finiteSizedNonFlatFilms';
+
+
+%% Based on the choice a part of this code gets executed
 
 switch filmConfiguration
     case 'flatFilms_PBC' 
-        kappa = 0;
+        kappa = 0;                  
         transitionLength = 0;
         L_flat = 15;
         L_curv = 0;
@@ -52,10 +62,10 @@ switch filmConfiguration
         [h x] = initialProfile(kappa,L_flat,L_curv,transitionLength,deltaX, filmConfiguration);
     case 'finiteSizedNonFlatFilms'
         %% raw conditions from the paper
-        R_film = [20 25 30 35 40 50 60 65 70 75 80 85 90 100 115 150 200 300 400 500 600 700 800 900 1000];   % radius of the film
-        % R_film = [30];
+%         R_film = [25 30 35 40 50 60 65 70 75 80 85 90 100 115 150 200 300 400 500 600 700 800 900 1000];   % radius of the film
+        R_film = [30];
         R_f = R_film.*10^-6;              % in m
-        h0_init = 150e-9;                 % initial film height in m
+        h0_init = 300e-9;                 % initial film height in m
         A_vw = 1.25e-21;                  % Hamaker constant
         gam = 0.034;                      % surface tension
         Rc = 1.8e-3;                      % radius of capillary
@@ -103,7 +113,7 @@ switch filmConfiguration
         lowerLimitOnL_curv = 1./sqrt(2*kappa);
         transitionLength = lowerLimitOnL_curv;
         L_curv = 0.1;                       % length of the curved portion of the film, for kappa > 1, one needs a smaller value of of L_curv
-        endTime = 150;
+        endTime = 0.01;
         seN = 1;                            % save every these many time steps
         N_Reals = 1;                        % number of realizations
         animationSkip = 20;                 % save animation every these many time steps
@@ -123,7 +133,7 @@ switch filmConfiguration
         
         %% parent folder
         
-        mk = strcat('h0_',num2str(h0_init*10^9),'nm','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc));
+        mk = strcat('__h0_',num2str(h0_init*10^9),'nm_','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc));
         mkdir(mk);
         cd(mk);
         
@@ -149,23 +159,21 @@ end
         
 %% start simulations for semi-infinite films or flat films with periodic boundary conditions
 
-for i = 1:length(L_flat)
-    switch filmConfiguration
-        case {'flatFilms_PBC','semiInfiniteNonFlatFilms'}
-            str1{i} = strcat('theta_', num2str(Tmp));
-            mkdir(str1{i});
-            cd(str1{1});
-            str2{i} = strcat('kappa_', num2str(kappa));
-            mkdir(str2{i});
-            path_dest{i} = strcat('./', num2str(str2{i}));
-            destinatn = path_dest{i};
-            copyfile('../*.m', destinatn)
-            run_mainFiles{i} = strcat('./',num2str(str2{i}));
-            cd(run_mainFiles{i})
-            main_flatOrSemiInfiniteFilms(filmConfiguration, kappa, L_flat, deltaX, deltaT, transitionLength, ctimestep, Tmp, L_curv,...
-                endTime, seN, N_Reals, startRealization)
-            cd ..
-    end
+switch filmConfiguration
+    case {'flatFilms_PBC','semiInfiniteNonFlatFilms'}
+        str1{i} = strcat('theta_', num2str(Tmp));
+        mkdir(str1{i});
+        cd(str1{1});
+        str2{i} = strcat('kappa_', num2str(kappa));
+        mkdir(str2{i});
+        path_dest{i} = strcat('./', num2str(str2{i}));
+        destinatn = path_dest{i};
+        copyfile('../*.m', destinatn)
+        run_mainFiles{i} = strcat('./',num2str(str2{i}));
+        cd(run_mainFiles{i})
+        main_flatOrSemiInfiniteFilms(filmConfiguration, kappa, L_flat, deltaX, deltaT, transitionLength, ctimestep, Tmp, L_curv,...
+            endTime, seN, N_Reals, startRealization)
+        cd ..
 end
 
 save('workspaceInputParameters.mat')

@@ -1,7 +1,7 @@
 function [h_right_avg_j h_left_avg_j x_dimple_loc_right h_right x_right] = spatialResolution_filmThickness(x,c,t,res_limit, deltaX);
 
 %% calculate region around the right dimple
-    x = x';
+%     x = x';
     x_ri = x(x>0);
     for i = 1:length(t)-1;
         h_r = c(:,i);

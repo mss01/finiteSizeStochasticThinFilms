@@ -23,19 +23,15 @@ v.FrameRate = 5;  % Default 30
 v.Quality = 100;    % Default 75
 open(v)
 hfig = figure;
-
-for i = 1:animationSkip:q-1
+i = 1;
+j = 1;
+while i <= q
     Y = h_all(:,i);
-    area(x',Y)
-    ylim([0 1.5])
-    xlim([-2*L_flat 2*L_flat])
-    xlabel('x [-]','Fontsize',16)
-    ylabel('h [-]','Fontsize',16)
-    set(gca,'FontSize',18)
-    legend(t_new(i))
-    M(i) = getframe(hfig);
+    M(:,:,:,j) = video_plot(L_flat, x,Y, t_new(i));
+    i = i + animationSkip;
+    j = j + 1;
 end
-M = M(~cellfun(@isempty,{M.cdata}));
+% M = M(~cellfun(@isempty,{M.cdata}));
 writeVideo(v,M)
 close(v)
 

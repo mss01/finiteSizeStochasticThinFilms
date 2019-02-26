@@ -8,4 +8,5 @@ test*
 *.png
 *.jpeg
 h0*
+__h0*
 theta*

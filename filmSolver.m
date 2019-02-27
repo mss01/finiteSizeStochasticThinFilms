@@ -1,4 +1,4 @@
-function t_rupt = filmSolver(filmConfiguration, L_flat,transitionLength,L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN);
+function [t_rupt x_rupt minH] = filmSolver(filmConfiguration, L_flat,transitionLength,L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN);
 
 
 tic
@@ -168,9 +168,13 @@ while min(h_store(:,end)) < 0
     h_store = h_store(:,[1:end-1]);
     t_store = t_store(1:end-1);
 end
-save('hData.mat','h_store','t_store');
-
 t_rupt = t;                     % rupture time obtained from this simulation
+[minH{1} idx] = min(h_store);
+x_min = x(idx);
+x_rupt = x_min(end);
+
+save('hData.mat','h_store','t_store','minH', 'x_min', 't_rupt', 'x_rupt');
+
 toc
 
 end

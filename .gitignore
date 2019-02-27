@@ -9,4 +9,6 @@ test*
 *.jpeg
 h0*
 __h0*
+_h0*
 theta*
+inputFile.m

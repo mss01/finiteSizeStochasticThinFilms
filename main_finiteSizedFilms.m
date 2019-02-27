@@ -64,7 +64,7 @@ for m = 1:N_Reals
     A(h_adjusted*(h_adjusted-1))=-2;
     %% call the solver
 
-    t_rupt(m) = filmSolver(filmConfiguration, L_flat,transitionLength,L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN);
+    [t_rupt(m) x_rupt(m) minH(:,m)] = filmSolver(filmConfiguration, L_flat,transitionLength,L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN);
 
     reali_series(m) = m;
     realization = realization + 1;

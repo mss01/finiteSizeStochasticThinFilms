@@ -1,5 +1,5 @@
 function [h_min_rim h_centre_Joye t_rim v_re_Joye dhdt_rim dhdt_centre c_r_Joye ratio_v_vre ratio_vc_vre] = ...
-                    joyeAnalysis(hJoyeStart, hJoyeEnd, h_min, h_centre_j, deltaT, seN, t_store, kappa, L_flat, R_f, h0_init, Rc);
+                    joyeAnalysis(hJoyeStart, hJoyeEnd, h_min, h_max_dimp_l, h_max_dimp_r, h_centre_j, deltaT, seN, t_store, kappa, L_flat, R_f, h0_init, Rc);
 
 set(groot, 'defaultAxesTickLabelInterpreter','latex'); 
 set(groot, 'defaultLegendInterpreter','latex');
@@ -12,6 +12,8 @@ set(0, 'defaulttextInterpreter','latex');
 
 
 h_min_rim = h_min(h_min < hJoyeStart & h_min > hJoyeEnd);
+h_max_dimp_l_rel = h_max_dimp_l(h_min < hJoyeStart & h_min > hJoyeEnd);
+h_max_dimp_r_rel = h_max_dimp_r(h_min < hJoyeStart & h_min > hJoyeEnd);
 h_centre_Joye = h_centre_j(h_min < hJoyeStart & h_min > hJoyeEnd)';
 t = t_store;
 hfig1 = figure;
@@ -40,6 +42,8 @@ for i = 1:length(h_min_rim)-1
 end
 
 c_r_Joye = 2.*h_min_rim.*h0_init.*Rc./R_f^2;
+c_r_Joye_l = 2.*h_max_dimp_l_rel.*h0_init.*Rc./R_f^2;
+c_r_Joye_r = 2.*h_max_dimp_r_rel.*h0_init.*Rc./R_f^2;
 c_r_Joye_centre = 2.*h_centre_Joye.*h0_init.*Rc./R_f^2;
 ratio_v_vre = abs(dhdt_rim)./v_re_Joye(2:end);
 ratio_vc_vre = abs(dhdt_centre)./v_re_Joye_centre(2:end);
@@ -52,13 +56,15 @@ set(gca,'FontSize',14)
 set(hfig2,'Units','Inches');
 pos = get(hfig2,'Position');
 set(hfig2,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
-print(hfig2,'thinningRates_vs_C_R','-dpdf','-r300')
+print(hfig2,'thinningRates_vs_C_R_hmin','-dpdf','-r300')
 
 hfig3 = figure;
-loglog(c_r_Joye(2:end), ratio_v_vre, 'o')
+loglog(c_r_Joye_l(2:end), ratio_v_vre, 'o')
 hold on
-loglog(c_r_Joye(2:end), ratio_vc_vre,'--')
-legend('rim thinning rate','centre thinning rate','location','best')
+loglog(c_r_Joye_r(2:end), ratio_v_vre, 'o')
+hold on
+loglog(c_r_Joye_centre(2:end), ratio_vc_vre,'--')
+legend('rim thinning rate-l','rim thinning rate-r','centre thinning rate','location','best')
 xlabel('$C_r$')
 ylabel('$v/v_{re}$')
 set(gca,'FontSize',14)

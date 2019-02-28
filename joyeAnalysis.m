@@ -31,8 +31,14 @@ set(hfig1,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), 
 print(hfig1,'h_min_h_centreVst','-dpdf','-r300')
 
 t_rim = t(h_min < hJoyeStart & h_min > hJoyeEnd);
-v_re_Joye = 16*h_min_rim.^3*kappa./L_flat^2;
-v_re_Joye_centre = 16*h_centre_Joye.^3*kappa./L_flat^2;
+
+%% this is based on cylindrical coordinates and for only Laplace pressure
+% v_re_Joye = 16*h_min_rim.^3*kappa./L_flat^2;   
+% v_re_Joye_centre = 16*h_centre_Joye.^3*kappa./L_flat^2;
+
+%% the following is based on cartesian coordinates and accounting for both Laplace pressure and disjoining pressure
+v_re_Joye = h_min_rim.^3./L_flat^2.*(6*kappa + 1./h_min_rim.^3);
+v_re_Joye_centre = h_centre_Joye.^3./L_flat^2.*(6*kappa + 1./h_centre_Joye.^3);
 for i = 1:length(h_min_rim)-1
     dhdt_rim(i) = (h_min_rim(i+1) - h_min_rim(i))./(seN*deltaT);
 end

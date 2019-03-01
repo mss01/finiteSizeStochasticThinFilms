@@ -73,10 +73,10 @@ switch filmConfiguration
         cd ..
     case 'finiteSizedNonFlatFilms'
         %% raw conditions from the paper
-%         R_film = [20 25 30 35 40 50 60 65 70 75 80 85 90 100 115 150 200 300 400 500 600 700 800 900 1000];   % radius of the film
-        R_film = [115 150 200 300 400 500 600 700 800 900 1000];
+        R_film = [15 20 25 30 35 40 50 60 65 70 75 80 85 90 100 115 150 200 300 400 500 600 700 800 900 1000];   % radius of the film
+%         R_film = [115 150 200 300 400 500 600 700 800 900 1000];
         R_f = R_film.*10^-6;              % in m
-        h0_init = 300e-9;                 % initial film height in m
+        h0_init = 200e-9;                 % initial film height in m
         A_vw = 1.25e-21;                  % Hamaker constant
         gam = 0.034;                      % surface tension
         Rc = 1e-3;                        % radius of capillary
@@ -123,7 +123,7 @@ switch filmConfiguration
         upperLimitOnL_curv = sqrt(pi*h0_init^2*gam/(2*A_vw*kappa));
         lowerLimitOnL_curv = 1./sqrt(2*kappa);
         transitionLength = lowerLimitOnL_curv;
-        L_curv = 0.1;                       % length of the curved portion of the film, for kappa > 1, one needs a smaller value of of L_curv
+        L_curv = 30*transitionLength;                       % length of the curved portion of the film, for kappa > 1, one needs a smaller value of of L_curv
         endTime = 0.01;
         seN = 1;                            % save every these many time steps
         N_Reals = 1;                        % number of realizations

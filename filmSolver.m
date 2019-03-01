@@ -1,4 +1,4 @@
-function [t_rupt x_rupt minH] = filmSolver(filmConfiguration, L_flat,transitionLength,L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN);
+function [t_rupt x_rupt minH] = filmSolver(filmConfiguration, disjPress_switch, L_flat,transitionLength,L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN);
 
 
 tic
@@ -46,8 +46,19 @@ tic
 
 %%%%%----------- Recall the initial conditions ------------%%%%%
 
-[h x] = initialProfile(kappa,L_flat,L_curv,transitionLength,deltaX, filmConfiguration);
-p1 = deltaT/(deltaX^2);            % parameter for the explicit part (disj press)
+[h x] = initialProfile(kappa, L_flat,L_curv,transitionLength,deltaX, filmConfiguration);
+
+if isequal(disjPress_switch, 'on') 
+    p1 = deltaT/(deltaX^2);            % parameter for the explicit part (disj press)
+elseif isequal(disjPress_switch, 'off') 
+    p1 = 0;
+end
+
+%if disjPress_switch == 'on';
+ %   p1 = deltaT/(deltaX^2);            % parameter for the explicit part (disj press)
+%elseif disjPress_switch == 'off'
+%    p1 = 0;
+%end
 p2 = deltaT/(deltaX^4);            % parameter for the implicit part (surf tension)
 p3 = 1/(deltaX)*sqrt(2*deltaT*Tmp);     % parameter for the noise term, also explicit
 
@@ -137,7 +148,7 @@ for i = 1:length(t_range)      % time marching
 %         dlmwrite(sprintf('Data_%1.15f.txt',t),h,'precision','%.16f','delimiter','\t')    % save it as a txt file to be used in matlab post processing script
         saver = saver + 1;
     end
-    if min(h(:)) <= 2e-5
+    if min(h(:)) <= 0.05
 %         dlmwrite(sprintf('Data_%1.15f.txt',t),h,'precision','%.16f','delimiter','\t')      % write the last file because it becomes important especially for high kappa values in the late regime
         h_store(:,saver) = h;
         t_store(saver) = t;
@@ -173,7 +184,7 @@ t_rupt = t;                     % rupture time obtained from this simulation
 x_min = x(idx);
 x_rupt = x_min(end);
 
-save('hData.mat','h_store','t_store','minH', 'x_min', 't_rupt', 'x_rupt');
+save('hData.mat','h_store','t_store','minH', 'x_min', 't_rupt', 'x_rupt', '-v7.3');
 
 toc
 

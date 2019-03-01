@@ -1,4 +1,4 @@
-function main_finiteSizedFilms(filmConfiguration, R_f, h0_init, A_vw, gam, Rc, visc, L_flat, N_flat, deltaX, deltaT, transitionLength, h_drain_start, h_drain_end, h_critical_start,...
+function main_finiteSizedFilms(filmConfiguration, disjPress_switch, R_f, h0_init, A_vw, gam, Rc, visc, L_flat, N_flat, deltaX, deltaT, transitionLength, h_drain_start, h_drain_end, h_critical_start,...
                 h_critical_end, t_cr_dimensional, res_limit, ctimestep, Tmp, L_curv, endTime, seN, N_Reals, animationSkip, ...
                 startRealization, hJoyeStart, hJoyeEnd)
 
@@ -64,7 +64,7 @@ for m = 1:N_Reals
     A(h_adjusted*(h_adjusted-1))=-2;
     %% call the solver
 
-    [t_rupt(m) x_rupt(m) minH(:,m)] = filmSolver(filmConfiguration, L_flat,transitionLength,L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN);
+    [t_rupt(m) x_rupt(m) minH(:,m)] = filmSolver(filmConfiguration, disjPress_switch, L_flat,transitionLength,L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN);
 
     reali_series(m) = m;
     realization = realization + 1;
@@ -78,7 +78,7 @@ end
 filename = ['data_', 'kappa_',num2str(kappa),'_Lf_',num2str(L),'_N_',num2str(N), '_Tmp_', num2str(Tmp),'.mat'];
 save(filename)
 
-postProc_det(filmConfiguration, R_f, L_flat, L_curv, transitionLength, deltaX, deltaT, kappa, seN, animationSkip, ...
+postProc_det(filmConfiguration, disjPress_switch, R_f, L_flat, L_curv, transitionLength, deltaX, deltaT, kappa, seN, animationSkip, ...
     h_drain_start, h_drain_end, h_critical_start, h_critical_end, t_cr, res_limit, hJoyeStart, hJoyeEnd, h0_init, Rc);
 
 

@@ -1,4 +1,4 @@
-function postProc_det(filmConfiguration, R_f, L_flat, L_curv, transitionLength, deltaX, deltaT, kappa, seN, animationSkip, h_drain_start, h_drain_end, h_critical_start, ...
+function postProc_det(filmConfiguration, disjPress_switch, R_f, L_flat, L_curv, transitionLength, deltaX, deltaT, kappa, seN, animationSkip, h_drain_start, h_drain_end, h_critical_start, ...
                         h_critical_end, t_cr, res_limit, hJoyeStart, hJoyeEnd, h0_init, Rc);
 
 tic
@@ -31,7 +31,7 @@ cr_thickness = 0.627*kappa^(-2/7);                          % theoretical predic
                                                                     h_drain_start, h_drain_end, t_cr, deltaX, deltaT, h_critical_start, h_critical_end);
     
 [h_min_rim h_centre_Joye t_rim v_re_Joye dhdt_rim dhdt_centre c_r_Joye ratio_v_vre ratio_vc_vre] = ...
-    joyeAnalysis(hJoyeStart, hJoyeEnd, h_min, h_max_dimp_l, h_max_dimp_r, h_centre_j, deltaT, seN, t_store, kappa, L_flat, R_f, h0_init, Rc);
+    joyeAnalysis(disjPress_switch, hJoyeStart, hJoyeEnd, h_min, h_max_dimp_l, h_max_dimp_r, h_centre_j, deltaT, seN, t_store, kappa, L_flat, R_f, h0_init, Rc);
                         
 save('workspace_deterministic_t_cr.mat')
 makeAnimation_det(filmConfiguration, animationSkip,kappa, L_flat, L_curv, transitionLength,deltaX, h_store, t_store);

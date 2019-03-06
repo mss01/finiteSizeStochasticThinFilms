@@ -1,5 +1,5 @@
 function main_flatOrSemiInfiniteFilms(filmConfiguration, disjPress_switch, kappa, L_flat, deltaX, deltaT, transitionLength, ctimestep, Tmp, L_curv,...
-                endTime, seN, N_Reals, startRealization)
+                endTime, seN, N_Reals, startRealization, cutOff_thickness)
 
 
 
@@ -95,7 +95,7 @@ for m = 1:N_Reals
     
     %% call the solver
 
-    [t_rupt(m) x_rupt(m) minH(:,m)] = filmSolver(filmConfiguration, disjPress_switch, L_flat,transitionLength,L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN);
+    [t_rupt(m) x_rupt(m) minH(:,m)] = filmSolver(filmConfiguration, disjPress_switch, L_flat,transitionLength,L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN, cutOff_thickness);
 
     reali_series(m) = m;
     realization = realization + 1;

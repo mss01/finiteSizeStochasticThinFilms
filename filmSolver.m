@@ -1,4 +1,4 @@
-function [t_rupt x_rupt minH] = filmSolver(filmConfiguration, disjPress_switch, L_flat,transitionLength,L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN);
+function [t_rupt x_rupt minH] = filmSolver(filmConfiguration, disjPress_switch, L_flat,transitionLength,L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN, cutOff_thickness);
 
 
 tic
@@ -148,7 +148,7 @@ for i = 1:length(t_range)      % time marching
 %         dlmwrite(sprintf('Data_%1.15f.txt',t),h,'precision','%.16f','delimiter','\t')    % save it as a txt file to be used in matlab post processing script
         saver = saver + 1;
     end
-    if min(h(:)) <= 0.05
+    if min(h(:)) <= cutOff_thickness
 %         dlmwrite(sprintf('Data_%1.15f.txt',t),h,'precision','%.16f','delimiter','\t')      % write the last file because it becomes important especially for high kappa values in the late regime
         h_store(:,saver) = h;
         t_store(saver) = t;

@@ -54,23 +54,18 @@ elseif isequal(disjPress_switch, 'off')
     p1 = 0;
 end
 
-%if disjPress_switch == 'on';
- %   p1 = deltaT/(deltaX^2);            % parameter for the explicit part (disj press)
-%elseif disjPress_switch == 'off'
-%    p1 = 0;
-%end
 p2 = deltaT/(deltaX^4);            % parameter for the implicit part (surf tension)
 p3 = 1/(deltaX)*sqrt(2*deltaT*Tmp);     % parameter for the noise term, also explicit
 
 %%  preallocation
 
-h1_r = zeros(size(h));
-h1_l = zeros(size(h));
-h2_r = zeros(size(h));
-h2_l = zeros(size(h));
-R = zeros(size(x));
-noi_r = zeros(size(x));
-noi_l = zeros(size(x));
+% h1_r = zeros(size(h));
+% h1_l = zeros(size(h));
+% h2_r = zeros(size(h));
+% h2_l = zeros(size(h));
+% R = zeros(size(x));
+% noi_r = zeros(size(x));
+% noi_l = zeros(size(x));
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 k = linspace(1,h_adjusted,h_adjusted);     % vector used in vectorization
@@ -169,6 +164,7 @@ end
 
 
 
+% amchi = h_store
 % test1 = size(h_store)
 % test2 = length(h)
 % test3 = length(t_store)

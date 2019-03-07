@@ -79,13 +79,13 @@ switch filmConfiguration
         cd ..
     case 'finiteSizedNonFlatFilms'
         %% raw conditions from the paper
-        R_film = [25 30 35 40 50 60 65 70 75 80 85 90 100 115 150 200 300 400 500 600 700 800 900 1000];   % radius of the film
-%         R_film = [115 150 200 300 400 500 600 700 800 900 1000];
+        R_film = [75 80 85 90 100 115 150 200 300 400 500 600 700 800 900 1000];   % radius of the film
+%         R_film = [70];
         R_f = R_film.*10^-6;              % in m
         h0_init = 500e-9;                 % initial film height in m
         A_vw = 1.25e-21;                  % Hamaker constant
         gam = 0.034;                      % surface tension
-        Rc = 1e-3;                        % radius of capillary
+        Rc = 10e-3;                      % radius of capillary
         visc = 0.00089;                   % viscosity
         t_cr_dimensional = [2 3 4 5];     % time resolution (in sec) 
         res_limit_dimensional = 22e-6;    % spatial resolution (in m)
@@ -112,26 +112,36 @@ switch filmConfiguration
         deltaX = 0.00125*ones(size(R_f));            % grid size (tested for grid independent results)
         L_flat = round(R_f/l_scale,4);              % length of the flat film
         N_flat = round(L_flat./deltaX);             % number of grid points in the same
-        ctimestep = 3;                              % exponent used in deciding deltaT = deltaX^c --> although c = 2.75 suffices, but a higher temp resolution enables more time stamps
+%         ctimestep = 3;                              % exponent used in deciding deltaT = deltaX^c --> although c = 2.75 suffices, but a higher temp resolution enables more time stamps
+        for i = 1:length(R_film)
+            if R_film(i) < 50
+                seN(i) = 20;                            % save every these many time steps
+                ctimestep(i) = 3;
+            else
+                seN(i) = 20;                            % save every these many time steps
+                ctimestep(i) = 3;
+            end
+        end
 
         for i = 1:length(N_flat)
             if (N_flat(i)) < 40
                 N_flat(i) = 40;
                 deltaX(i) = L_flat(i)/N_flat(i);
-                deltaT(i) = deltaX(i)^ctimestep;                      % end time of a realization
+                deltaT(i) = deltaX(i).^ctimestep(i);     % end time of a realization
             end        
         end
         deltaT = deltaX.^ctimestep;
 
 
         %% simulation parameters
+        
         Tmp = 0.0;                          % dimensionless noise strength (= 0, for deterministic)
         upperLimitOnL_curv = sqrt(pi*h0_init^2*gam/(2*A_vw*kappa));
         lowerLimitOnL_curv = 1./sqrt(2*kappa);
         transitionLength = lowerLimitOnL_curv;
-        L_curv = 30*transitionLength;                       % length of the curved portion of the film, for kappa > 1, one needs a smaller value of of L_curv
-        endTime = 0.0001;
-        seN = 1;                            % save every these many time steps
+        L_curv = 15*transitionLength;                       % length of the curved portion of the film, for kappa > 1, one needs a smaller value of of L_curv
+        endTime = 0.001;
+        
         N_Reals = 1;                        % number of realizations
         animationSkip = 20;                 % save animation every these many time steps
         startRealization = 1;               % first realization
@@ -171,12 +181,13 @@ switch filmConfiguration
             run_mainFiles{i} = strcat('./',num2str(str1{i}));
             cd(run_mainFiles{i})
             main_finiteSizedFilms(filmConfiguration, disjPress_switch, R_f(i), h0_init, A_vw, gam, Rc, visc, L_flat(i), N_flat(i), deltaX(i), deltaT(i), transitionLength, h_drain_start, h_drain_end, h_critical_start,...
-                h_critical_end, t_cr_dimensional, res_limit, ctimestep, Tmp, L_curv, endTime, seN,...
+                h_critical_end, t_cr_dimensional, res_limit, ctimestep(i), Tmp, L_curv, endTime, seN(i),...
                 N_Reals, animationSkip, startRealization, hJoyeStart, hJoyeEnd, cutOff_thickness)
+
             
             cd ..
             fileToBeSaved = strcat('workspace_','Rf_',num2str(min(R_film)),'_to_',num2str(max(R_film)),'.mat');
-            save('fileToBeSaved')
+            save(fileToBeSaved)
         end
 end
 

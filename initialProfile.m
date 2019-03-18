@@ -11,8 +11,8 @@ switch filmConfiguration
         x1 = fliplr(x1);
         x2 = 0:deltaX:(L_flat+2*deltaX);   % domain for the flat portion of the film along with the two ghost points
         x = [x1 x2];      % full domain
-        h1_dom = 1 + kappa*x1.^2;          % height for the curved portion
-        h2_dom = ones(max(size(x2)),1)';   % height of the flat potion
+        h1_dom = 1 + kappa*x1.^2; % + 10^-3.*(1 - 2.*rand(1,length(x1)));          % height for the curved portion
+        h2_dom = ones(max(size(x2)),1)'; % + 10^-3.*(1 - 2.*rand(1,length(x2)));   % height of the flat potion
         h = [h1_dom h2_dom];              % full domain 
     case 'finiteSizedNonFlatFilms'
         x1 = [-transitionLength-deltaX:-deltaX:-L_curv-deltaX];

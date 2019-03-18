@@ -15,10 +15,10 @@ set(0, 'defaulttextInterpreter','latex');
 % filmConfiguration = 'flatFilms_PBC';    
 
 %%%%  semi-infinite films with far field boundary conditions %%%%%%
-% filmConfiguration = 'semiInfiniteNonFlatFilms';
+filmConfiguration = 'semiInfiniteNonFlatFilms';
 
 %%%%% finite sized films with curvature on both sides  %%%%%%
-filmConfiguration = 'finiteSizedNonFlatFilms';
+% filmConfiguration = 'finiteSizedNonFlatFilms';
 
 %% Do we switch off the disjoining pressure in the solver?
 
@@ -29,19 +29,19 @@ disjPress_switch = 'on';
 
 switch filmConfiguration
     case {'flatFilms_PBC', 'semiInfiniteNonFlatFilms'} 
-        kappa = 0.1;
-        Tmp = 0.01;
-        L_flat = 15;  
+        kappa = 0.001;
+        Tmp = 0.0;
+        L_flat = 240;  
         if kappa == 0
             transitionLength = 0;
             L_curv = 0;
         else
             transitionLength = 1./sqrt(2*kappa);
-            L_curv = 105;
+            L_curv = 300;
         end
 
         if Tmp == 0
-            N_Reals = 1;
+            N_Reals = 3;
         else
             N_Reals = 2;   %% please adjust the number of realizations based on how many you want to sample
         end
@@ -79,12 +79,12 @@ switch filmConfiguration
         cd ..
     case 'finiteSizedNonFlatFilms'
         %% raw conditions from the paper
-        R_film = [20 25 30 35 40 50 60 65 70 75 80 85 90 100 115 150 200 300 400 500 600 700 800 900 1000];   % radius of the film
+        R_film = [25 30 35 40 50 60 65 70 75 80 85 90 100 115 150 200 300 400 500 600 700 800 900 1000];   % radius of the film
 %         R_film = [70 90 150 800];
         R_f = R_film.*10^-6;              % in m
-        h0_init = 200e-9;                 % initial film height in m
-        A_vw = 1.25e-21;                  % Hamaker constant
-        gam = 0.034;                      % surface tension
+        h0_init = 1000e-9;                % initial film height in m
+        A_vw = 1.5e-20;                   % Hamaker constant
+        gam = 0.0445;                     % surface tension
         Rc = 1.8e-3;                      % radius of capillary
         visc = 0.00089;                   % viscosity
         t_cr_dimensional = [2 3 4 5];     % time resolution (in sec) 
@@ -101,7 +101,7 @@ switch filmConfiguration
         res_limit = res_limit_dimensional/l_scale;      % spatial resolution (scaled)
         h_drain_start = 100e-9/h0_init;                 % 100nm as mentioned in Wasan & Malhotra (1987)
         h_drain_end = 25e-9/h0_init;                    % 25 nm as mentioned in Wasan & Malhotra (1987)
-        hJoyeStart = 0.9;                                 % determine when to start measuring thinning rates
+        hJoyeStart = 0.7;                                 % determine when to start measuring thinning rates
         hJoyeEnd = 0.627*kappa^(-2/7);                  % where to end
         h_critical_start = 0.627*kappa^(-2/7)*1.2;      % this is when the film thinning velocity starts becoming nearly constant
         h_critical_end = 0.627*kappa^(-2/7)*0.8;        % this is when the film thinning velocity ends becoming nearly constant
@@ -109,7 +109,7 @@ switch filmConfiguration
 
         %% domain size and discretization parameters
 
-        deltaX = 0.00125*ones(size(R_f));            % grid size (tested for grid independent results)
+        deltaX = 0.0025*ones(size(R_f));            % grid size (tested for grid independent results)
         L_flat = round(R_f/l_scale,4);              % length of the flat film
         N_flat = round(L_flat./deltaX);             % number of grid points in the same
 %         ctimestep = 3;                              % exponent used in deciding deltaT = deltaX^c --> although c = 2.75 suffices, but a higher temp resolution enables more time stamps
@@ -138,9 +138,9 @@ switch filmConfiguration
         Tmp = 0.0;                          % dimensionless noise strength (= 0, for deterministic)
         upperLimitOnL_curv = sqrt(pi*h0_init^2*gam/(2*A_vw*kappa));
         lowerLimitOnL_curv = 1./sqrt(2*kappa);
-        transitionLength = lowerLimitOnL_curv;
-        L_curv = 15*transitionLength;                       % length of the curved portion of the film, for kappa > 1, one needs a smaller value of of L_curv
-        endTime = 0.01;
+        transitionLength = 0.5*lowerLimitOnL_curv;
+        L_curv = 15*lowerLimitOnL_curv;                       % length of the curved portion of the film, for kappa > 1, one needs a smaller value of of L_curv
+        endTime = 0.0001;
         
         N_Reals = 1;                        % number of realizations
         animationSkip = 50;                 % save animation every these many time steps

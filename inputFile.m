@@ -15,10 +15,10 @@ set(0, 'defaulttextInterpreter','latex');
 % filmConfiguration = 'flatFilms_PBC';    
 
 %%%%  semi-infinite films with far field boundary conditions %%%%%%
-filmConfiguration = 'semiInfiniteNonFlatFilms';
+% filmConfiguration = 'semiInfiniteNonFlatFilms';
 
 %%%%% finite sized films with curvature on both sides  %%%%%%
-% filmConfiguration = 'finiteSizedNonFlatFilms';
+filmConfiguration = 'finiteSizedNonFlatFilms';
 
 %% Do we switch off the disjoining pressure in the solver?
 
@@ -79,12 +79,12 @@ switch filmConfiguration
         cd ..
     case 'finiteSizedNonFlatFilms'
         %% raw conditions from the paper
-        R_film = [25 30 35 40 50 60 65 70 75 80 85 90 100 115 150 200 300 400 500 600 700 800 900 1000];   % radius of the film
-%         R_film = [70 90 150 800];
+        R_film = [20 25 30 35 40 50 60 65 70 75 80 85 90 100 115 150 200 300 400 500 600 700 800 900 1000];   % radius of the film
+%         R_film = [800 900 1000];
         R_f = R_film.*10^-6;              % in m
-        h0_init = 1000e-9;                % initial film height in m
-        A_vw = 1.5e-20;                   % Hamaker constant
-        gam = 0.0445;                     % surface tension
+        h0_init = 800e-9;                % initial film height in m
+        A_vw = 2e-21;                   % Hamaker constant
+        gam = 0.034;                     % surface tension
         Rc = 1.8e-3;                      % radius of capillary
         visc = 0.00089;                   % viscosity
         t_cr_dimensional = [2 3 4 5];     % time resolution (in sec) 
@@ -117,9 +117,12 @@ switch filmConfiguration
             if R_film(i) < 50
                 seN(i) = 20;                            % save every these many time steps
                 ctimestep(i) = 3;
+            elseif R_film(i) >= 50 && R_film(i) < 400
+                seN(i) = 20;
+                ctimestep(i) = 3.0;
             else
                 seN(i) = 20;                            % save every these many time steps
-                ctimestep(i) = 3.0;
+                ctimestep(i) = 3.75;
             end
         end
 
@@ -156,7 +159,7 @@ switch filmConfiguration
         if isequal(disjPress_switch, 'on') 
             cutOff_thickness = 1e-05;            % keep it lower to be able to probe even smaller thicknesses if it reaches 
         elseif isequal(disjPress_switch, 'off') 
-            cutOff_thickness = 0.05;             % since the thinning rate in the absence of disj pres decreases asymptotically, a higher cut-off would save computational time
+            cutOff_thickness = 0.01;             % since the thinning rate in the absence of disj pres decreases asymptotically, a higher cut-off would save computational time
         end
         
         %% plot the first film length

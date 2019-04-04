@@ -89,16 +89,38 @@ for i = 1:length(t_range)      % time marching
 %     noi1 = (g(2:h_size-2) + g(3:h_size-1))./2;
 %     noi2 = (g(1:h_size-3) + g(2:h_size-2))./2;
 
+    switch filmConfiguration
+        case {'flatFilms_PBC', 'semiInfiniteNonFlatFilms', 'finiteSizedNonFlatFilms'} 
+            h1_r = 2*h(k(3:h_adjusted-2)).^2.*h(k(4:h_adjusted-1)).^2./(h(k(3:h_adjusted-2))+h(k(4:h_adjusted-1)));
 
-    h1_r = 2*h(k(3:h_adjusted-2)).^2.*h(k(4:h_adjusted-1)).^2./(h(k(3:h_adjusted-2))+h(k(4:h_adjusted-1)));
+            h1_l = 2*h(k(3:h_adjusted-2)).^2.*h(k(2:h_adjusted-3)).^2./(h(k(3:h_adjusted-2))+h(k(2:h_adjusted-3)));
 
-    h1_l = 2*h(k(3:h_adjusted-2)).^2.*h(k(2:h_adjusted-3)).^2./(h(k(3:h_adjusted-2))+h(k(2:h_adjusted-3)));
+            h2_r =  0.5.*(1./h(k(3:h_adjusted-2)) + 1./h(k(4:h_adjusted-1))).*(h(k(4:h_adjusted-1)) - h(k(3:h_adjusted-2)));
 
-    h2_r =  0.5.*(1./h(k(3:h_adjusted-2)) + 1./h(k(4:h_adjusted-1))).*(h(k(4:h_adjusted-1)) - h(k(3:h_adjusted-2)));
+            h2_l =  0.5.*(1./h(k(3:h_adjusted-2)) + 1./h(k(2:h_adjusted-3))).*(h(k(3:h_adjusted-2)) - h(k(2:h_adjusted-3)));
 
-    h2_l =  0.5.*(1./h(k(3:h_adjusted-2)) + 1./h(k(2:h_adjusted-3))).*(h(k(3:h_adjusted-2)) - h(k(2:h_adjusted-3)));
+            A(p) =[h1_l*p2; -(h1_r+3*h1_l)*p2; 3*(h1_r+h1_l)*p2+1; -(3*h1_r+h1_l)*p2; h1_r*p2];
+        case 'axisSymmetricFilm'
+            ratio1 = ( x(k(1:h_adjusted-4)) + x(k(2:h_adjusted-3))                          ) ./x(k(2:h_adjusted-3));
+            ratio2 = ( x(k(3:h_adjusted-2)) + x(k(2:h_adjusted-3))                          ) ./x(k(3:h_adjusted-2));
+            ratio3 = ( x(k(3:h_adjusted-2)) + 2*x(k(2:h_adjusted-3))  + x(k(1:h_adjusted-4))) ./x(k(2:h_adjusted-3));
+            ratio4 = ( x(k(4:h_adjusted-1)) + x(k(3:h_adjusted-2))                          ) ./x(k(4:h_adjusted-1));
+            ratio5 = ( x(k(4:h_adjusted-1)) + 2*x(k(3:h_adjusted-2))  + x(k(2:h_adjusted-3))) ./x(k(3:h_adjusted-2));
+            ratio6 = ( x(k(3:h_adjusted-2)) + x(k(2:h_adjusted-3))                          ) ./x(k(2:h_adjusted-3));
+            ratio7 = ( x(k(4:h_adjusted-1)) + x(k(3:h_adjusted-2))                          ) ./x(k(3:h_adjusted-2));
+            ratio8 = ( x(k(5:h_adjusted))   + 2.*x(k(4:h_adjusted-1)) + x(k(3:h_adjusted-2))) ./x(k(4:h_adjusted-1));
+            ratio9 = ( x(k(5:h_adjusted))   + x(k(4:h_adjusted-1))                          )./x(k(4:h_adjusted-1));
+            
+            h1_r = (x(k(3:h_adjusted-2)) + x(k(4:h_adjusted-1))).*h(k(3:h_adjusted-2)).^2.*h(k(4:h_adjusted-1)).^2./(h(k(3:h_adjusted-2))+ h(k(4:h_adjusted-1)));
+            h1_l = (x(k(3:h_adjusted-2)) + x(k(2:h_adjusted-3))).*h(k(3:h_adjusted-2)).^2.*h(k(2:h_adjusted-3)).^2./(h(k(3:h_adjusted-2))+ h(k(2:h_adjusted-3)));
+            
+            A(p) =[p2./(2.*x(k(3:h_adjusted-2))).*(h1_l.*ratio1); ...
+                        -p2./(2.*x(k(3:h_adjusted-2))).*( (h1_r + h1_l).*( ratio2 ) + h1_l.*(ratio3) ); ...
+                                1 + p2./(2.*x(k(3:h_adjusted-2))).*(h1_r.*(ratio4) + (h1_r + h1_l).*(ratio5) + h1_l.*(ratio6) ); ...
+                                    - p2./(2.*x(k(3:h_adjusted-2))).* ( (h1_l + h1_r).*(ratio7) +  h1_r.*(ratio8)); ...
+                                           + p2./(2.*x(k(3:h_adjusted-2))).* ( h1_r.*(ratio9) )];
+    end
 
-    A(p) =[h1_l*p2; -(h1_r+3*h1_l)*p2; 3*(h1_r+h1_l)*p2+1; -(3*h1_r+h1_l)*p2; h1_r*p2];
 
     %% generate the b-vector in Ax = b
     switch filmConfiguration
@@ -124,17 +146,24 @@ for i = 1:length(t_range)      % time marching
 %                 b = [2*kappa*deltaX^2; kappa*(x(2)+L_flat)^2+1; h(3:h_adjusted-2)-p1*(h2_r - h2_l) + p3.*(sqrt(h1_r).*noi_r - sqrt(h1_l).*noi_l); kappa*(x(end-1)-L_flat)^2+1 ; 2*kappa*deltaX^2];
 %             end
                 b = [2*kappa*deltaX^2; kappa*(x(2)+L_flat)^2+1; h(3:h_adjusted-2)-p1*(h2_r - h2_l) + p3.*(sqrt(h1_r).*noi_r - sqrt(h1_l).*noi_l); kappa*(x(end-1)-L_flat)^2+1 ; 2*kappa*deltaX^2];
+                
+        case 'axisSymmetricFilm'
+            
+                b = [0; 0; h(3:h_adjusted-2) ...
+                            + p1./(12*kappa.*x(k(3:h_adjusted-2))).*((h1_r./h(k(4:h_adjusted-1)).^3) - (h1_r + h1_l)./h(k(3:h_adjusted-2)).^3 ...
+                                            + h1_l./h(k(2:h_adjusted-3)).^3); 1+(x(end-1)^2 - L_flat^2)./4 + L_flat^2/2*log(L_flat/x(end-1)); ...
+                                            deltaX^2];
     end
     
     h = A\b;
 
 %======================================================================
 %               Save data after every few time steps
-%======================================================================
-    if i == length(t_range)
-        error('Beware ---> endTime is not sufficient')
-        break;
-    end
+% %======================================================================
+%     if i == length(t_range)
+%         error('Beware ---> endTime is not sufficient')
+%         break;
+%     end
     flag = flag + 1;
     if(flag==seN)
         h_store(:,saver) = h;
@@ -152,8 +181,10 @@ for i = 1:length(t_range)      % time marching
         continue
     end
     
+t
+h_store
+t_store
 
-        
 %  some check to ensure if any realization has given singular matrix, Matlab gives this warning away anyway, so have commented it for now.       
 %     if(rcond(full(A)) < 1e-12)
 %         break
@@ -162,12 +193,6 @@ for i = 1:length(t_range)      % time marching
 %     end
 end
 
-
-
-% amchi = h_store
-% test1 = size(h_store)
-% test2 = length(h)
-% test3 = length(t_store)
 t_store(t_store == 0) = [];
 h_store(h_store == 0) = [];
 h_store = reshape(h_store,length(h), length(t_store));
@@ -180,7 +205,7 @@ t_rupt = t;                     % rupture time obtained from this simulation
 x_min = x(idx);
 x_rupt = x_min(end);
 
-save('hData.mat','h_store','t_store','minH', 'x_min', 't_rupt', 'x_rupt', '-v7.3');
+save('hData.mat','h_store','t_store','minH', 'x_min', 't_rupt', 'x_rupt','-v7.3');
 
 toc
 

@@ -40,6 +40,15 @@ switch filmConfiguration
         else
             h = [h_left 1 h_right];
         end
+    case 'axisSymmetricFilm'
+        cutOff_r = 3*deltaX;
+        FlatPortion = cutOff_r - 2*deltaX:deltaX:L_flat;
+        CurvedPortion = (L_flat + deltaX):deltaX:(L_flat + L_curv + deltaX);
+        x = [FlatPortion CurvedPortion];
+        hFlat = ones(size(FlatPortion));
+        hCurv = 1 + (CurvedPortion.^2 - L_flat.^2)./4 + L_flat^2/2.*log(L_flat./CurvedPortion);
+        h = [hFlat hCurv];
+      
 end
 
 h = h';

@@ -18,7 +18,10 @@ set(0, 'defaulttextInterpreter','latex');
 % filmConfiguration = 'semiInfiniteNonFlatFilms';
 
 %%%%% finite sized films with curvature on both sides  %%%%%%
-filmConfiguration = 'finiteSizedNonFlatFilms';
+% filmConfiguration = 'finiteSizedNonFlatFilms';
+
+%%%%% axis-symmetric case
+filmConfiguration = 'axisSymmetricFilm';
 
 %% Do we switch off the disjoining pressure in the solver?
 
@@ -29,19 +32,19 @@ disjPress_switch = 'on';
 
 switch filmConfiguration
     case {'flatFilms_PBC', 'semiInfiniteNonFlatFilms'} 
-        kappa = 0.001;
+        kappa = 100;
         Tmp = 0.0;
-        L_flat = 240;  
+        L_flat = 20;  
         if kappa == 0
             transitionLength = 0;
             L_curv = 0;
         else
             transitionLength = 1./sqrt(2*kappa);
-            L_curv = 300;
+            L_curv = 1;
         end
 
         if Tmp == 0
-            N_Reals = 3;
+            N_Reals = 1;
         else
             N_Reals = 2;   %% please adjust the number of realizations based on how many you want to sample
         end
@@ -52,13 +55,13 @@ switch filmConfiguration
             cutOff_thickness = 0.05;             % since the thinning rate in the absence of disj pres decreases asymptotically, a higher cut-off would save computational time
         end
      
-        deltaX = 0.05;
+        deltaX = 0.005;
         N = (L_flat+L_curv)./deltaX;
         ctimestep = 2.75;
         deltaT = deltaX^ctimestep;
-        endTime = 150;
+        endTime = 200*deltaT; %150;
         seN = 20;
-        startRealization = 1;
+        startRealization = 5;
 
         [h x] = initialProfile(kappa,L_flat,L_curv,transitionLength,deltaX, filmConfiguration);
 
@@ -201,6 +204,120 @@ switch filmConfiguration
         %% post process finite sized films
         
         postProcessFiniteSizedFilms();
+        
+    case 'axisSymmetricFilm'
+        mkdir('axisSymmetricFilm')
+        cd('axisSymmetricFilm')
+%         R_film = [10 15 20 25 30 35 40 50 60 65 70 75 80 85 90 100 115 150 200 300 400 500 600 700 800 900 1000];   % radius of the film
+        R_film = [50];
+        R_f = R_film.*10^-6;              % in m
+        h0_init = 300e-9;                % initial film height in m
+        A_vw = 2e-21;                   % Hamaker constant
+        gam = 0.034;                     % surface tension
+        Rc = 1.8e-3;                      % radius of capillary
+        visc = 0.00089;                   % viscosity
+        t_cr_dimensional = [2 3 4 5];     % time resolution (in sec) 
+        res_limit_dimensional = 22e-6;    % spatial resolution (in m)
+
+        %% derived quantities from above 
+
+        l_scale = sqrt(Rc*h0_init/2);        % length scale of the system - obtained from the O(1) scaling
+        kappa = pi*h0_init^3*gam/A_vw/Rc;               % dimensionless curvature - the free parameter of the system
+        t_scale = 3*visc*Rc^2/(gam*h0_init);    % time scale of the system
+
+        %% drainage time start and end, critical thinning rates start and end, Joye's thinning rate start and end
+
+        res_limit = res_limit_dimensional/l_scale;      % spatial resolution (scaled)
+        h_drain_start = 100e-9/h0_init;                 % 100nm as mentioned in Wasan & Malhotra (1987)
+        h_drain_end = 25e-9/h0_init;                    % 25 nm as mentioned in Wasan & Malhotra (1987)
+        hJoyeStart = 0.7;                                 % determine when to start measuring thinning rates
+        hJoyeEnd = 0.627*kappa^(-2/7);                  % where to end
+        h_critical_start = 0.627*kappa^(-2/7)*1.2;      % this is when the film thinning velocity starts becoming nearly constant
+        h_critical_end = 0.627*kappa^(-2/7)*0.8;        % this is when the film thinning velocity ends becoming nearly constant
+        
+        %% domain size and discretization parameters
+
+        deltaX = 0.05*ones(size(R_f));             % grid size (tested for grid independent results)
+        L_flat = round(R_f./l_scale,2);            % length of the flat film
+        N_flat = round(L_flat./deltaX);            % number of grid points in the same
+        ctimestep = 2.75;                          % exponent used in deciding deltaT = deltaX^c --> although c = 2.75 suffices, but a higher temp resolution enables more time stamps
+        seN = 20;                                  % save every seN time steps
+
+        for i = 1:length(N_flat)
+            if (N_flat(i)) < 40
+                N_flat(i) = 40;
+                deltaX(i) = L_flat(i)/N_flat(i);
+            end        
+        end
+        deltaT = deltaX.^ctimestep;
+
+        %% simulation parameters
+        
+        Tmp = 0.0;                          % dimensionless noise strength (= 0, for deterministic)
+        upperLimitOnL_curv = sqrt(2*Rc/h0_init) + sqrt(2*Rc/h0_init - L_flat.^2);
+        lowerLimitOnL_curv = sqrt(h0_init*Rc)./l_scale;
+        transitionLength = lowerLimitOnL_curv;
+        L_curv = 15*lowerLimitOnL_curv;                       % length of the curved portion of the film, for kappa > 1, one needs a smaller value of of L_curv
+        endTime = 1000;
+        
+        N_Reals = 1;                        % number of realizations
+        animationSkip = 50;                 % save animation every these many time steps
+        startRealization = 1;               % first realization
+
+%         for i = 1:length(L_flat)
+%             if L_flat(i) <= transitionLength
+%                 error('Length of the flat film is smaller than the transition region')
+%                 break;
+%             end
+%         end
+        
+        if isequal(disjPress_switch, 'on') 
+            cutOff_thickness = 1e-05;            % keep it lower to be able to probe even smaller thicknesses if it reaches
+            mkdir('disjPress_on')
+            cd('disjPress_on')
+        elseif isequal(disjPress_switch, 'off') 
+            cutOff_thickness = 0.01;             % since the thinning rate in the absence of disj pres decreases asymptotically, a higher cut-off would save computational time
+            mkdir('disjPress_off')
+            cd('disjPress_off')
+        end
+        
+        
+        %% parent folder
+        
+        mk = strcat('h0_',num2str(h0_init*10^9),'nm','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc), '_disjPr_',disjPress_switch);
+        mkdir(mk);
+        cd(mk);
+        copyfile('../../../*.m', '.')
+        copyfile('../../../dataRadoev1984.xlsx', '.')
+        
+         %% plot the first film length
+        [h x] = initialProfile(kappa,L_flat(1),L_curv,transitionLength,deltaX(1),filmConfiguration);
+        plot(x,h,'o')
+        ylim([0 3])
+        
+        %% start simulations for different radii of films
+
+        for i = 1:length(L_flat)
+            str1{i} = strcat('Rf_', num2str(R_film(i)),'_mu_m');
+            mkdir(str1{i});
+            path_dest{i} = strcat('./', num2str(str1{i}));
+            destinatn = path_dest{i};
+            copyfile('*.m', destinatn)
+            run_mainFiles{i} = strcat('./',num2str(str1{i}));
+            cd(run_mainFiles{i})
+            [t_rupt(i) drainageTime(i) drainageTime_left(i) drainageTime_right(i) drainageTime_right_rupt(i) drainageTime_left_rupt(i) ...
+            avg_cr_thinningRate_fit(i) h_cr_final(:,i) h_cr_final_FullFilmavg(:,i)] = main_axisSymmetryFilm(filmConfiguration, disjPress_switch, ...
+                        R_f(i), h0_init, A_vw, gam, Rc, visc, L_flat(i), N_flat(i), deltaX(i), deltaT(i), transitionLength, h_drain_start,...
+                        h_drain_end, h_critical_start, h_critical_end, t_cr_dimensional, res_limit, ctimestep(i), Tmp, L_curv, endTime, seN(i),...
+                        N_Reals, animationSkip, startRealization, hJoyeStart, hJoyeEnd, cutOff_thickness);
+
+            
+            cd ..
+            fileToBeSaved = strcat('workspace_','Rf_',num2str(min(R_film)),'_to_',num2str(max(R_film)),'.mat');
+            save(fileToBeSaved)
+        end
+        save('results_differentFilmSize.mat')
+        
 end
 
 save('workspaceInputParameters.mat')

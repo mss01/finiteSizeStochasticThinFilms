@@ -52,8 +52,9 @@ for m = 1:N_Reals
             %% boundary conditions
             p_a=[1 h_adjusted+2 h_adjusted^2 h_adjusted*(h_adjusted - 1)-1];
             A(p_a )=ones (1,4);
-            p_b=[h_adjusted*2+h_adjusted-1 h_adjusted*3+h_adjusted (h_adjusted-4)*h_adjusted+1 (h_adjusted-3)*h_adjusted+2];
+            p_b=[h_adjusted*3+h_adjusted-1 h_adjusted*4+h_adjusted (h_adjusted-5)*h_adjusted+1 (h_adjusted-4)*h_adjusted+2];
             A(p_b)=ones (1,4) *-1;
+            B = full(A);
             
         case 'semiInfiniteNonFlatFilms';
             h_adjusted= N + 1; %  extra 1 for the additional grid point

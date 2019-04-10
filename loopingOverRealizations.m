@@ -1,8 +1,9 @@
-function [h_right_avg_j h_left_avg_j h_avg h_min h_centre_j v_thin_rim v_thin_centre avg_cr_thinningRate_fit h_cr_final ...
-    h_cr_final_FullFilmavg drainageTime drainageTime_left drainageTime_right drainageTime_right_rupt drainageTime_left_rupt t_rupt h_max_dimp_l h_max_dimp_r] = ...
-                                        loopingOverRealizations(x, L_flat, transitionLength, tt, x_centre, locDimple_left, ...
+function [h_right_avg_j h_min h_centre_j v_thin_rim v_thin_centre avg_cr_thinningRate_fit h_cr_final ...
+    h_cr_final_FullFilmavg drainageTime drainageTime_right drainageTime_right_rupt t_rupt h_max_dimp_r...
+    beginDrainageTime_right endDrainageTime_right x_dimple_loc_right] = loopingOverRealizations(x, L_flat, transitionLength, tt, x_centre, ...
                                         locDimple_right, res_limit, cr_thickness, h_drain_start, h_drain_end, ...
                                         t_cr, deltaX, deltaT, h_critical_start, h_critical_end);
+                                    
 
 set(groot, 'defaultAxesTickLabelInterpreter','latex'); 
 set(groot, 'defaultLegendInterpreter','latex');
@@ -28,14 +29,15 @@ q = max(size(t));
 for i = 1:q-1
     Y = h_store(:,i);
     h_centre(i) = Y(x_centre);
-    h_edges_left(i) = Y(locDimple_left);
+%     h_edges_left(i) = Y(locDimple_left);
     h_edges_right(i) = Y(locDimple_right);
-    h_avg(i) = mean(Y(locDimple_left:x_centre));
-    h_avg_right(i) = mean(Y(x_centre:locDimple_right));
+%     h_avg(i) = mean(Y(locDimple_left:x_centre));
+    h_avg(i) = mean(Y(x_centre:locDimple_right));
     t_centre(i) = t(i+1);
-    Y1 = h_store((x > (-L_flat + transitionLength)& x <= 0),i);
-    Y2 = h_store((x >= 0 & x < (L_flat - transitionLength)),i);
-    h_max_dimp_l(i) = max(Y1);
+%     Y1 = h_store((x > (-L_flat + transitionLength)& x <= 0),i);
+    Y2 = h_store((x >= 0 & x < (L_flat)),i);
+%     Y2 = h_store((x >= 0 & x < (L_flat - transitionLength)),i);
+%     h_max_dimp_l(i) = max(Y1);
     h_max_dimp_r(i) = max(Y2);
     h_max(i) = max(Y);
     h_min(i) = min(Y);
@@ -45,8 +47,8 @@ end
 t_rupt = t(end);
 h_centre_j = h_centre(:);
 h_centre_j(h_centre_j == 0) = [];
-h_edges_left_j =  h_edges_left(:);
-h_edges_left_j(h_edges_left_j == 0) = [];
+% h_edges_left_j =  h_edges_left(:);
+% h_edges_left_j(h_edges_left_j == 0) = [];
 h_edges_right_j =  h_edges_right(:);
 h_edges_right_j(h_edges_right_j == 0) = [];
 
@@ -61,7 +63,8 @@ v_thin_centre = (h_centre_j(end) - h_centre_j(1))./t_rupt;
 %     [h_right_avg_j(:,j) h_left_avg_j(:,j) x_dimple_loc_right(:,j)] = spatialResolution_filmThickness(x,c,t,res_limit(j));
 % end
 
-[h_right_avg_j h_left_avg_j x_dimple_loc_right h_right x_right] = spatialResolution_filmThickness(x,h_store,t,res_limit, deltaX);
+[h_right_avg_j x_dimple_loc_right h_right x_right] = spatialResolution_filmThickness(x,h_store,t,res_limit, deltaX);
+% [h_right_avg_j h_left_avg_j x_dimple_loc_right h_right x_right] = spatialResolution_filmThickness(x,h_store,t,res_limit, deltaX);
 
 save('hProbeAvg.mat')
 
@@ -75,7 +78,8 @@ h_avg_j = h_avg(:);
 h_avg_j(h_avg_j == 0) = [];
 
 for j = 1:length(t_cr)
-    [h_cr(:,j) h_cr_left(:,j) h_cr_right(:,j)] = criticalThicknesses_tempRes(deltaT, t, h_avg_j, del, cr_thickness, h_right_avg_j, h_left_avg_j, t_cr(j));
+    [h_cr(:,j) h_cr_right(:,j)] = criticalThicknesses_tempRes(deltaT, t, h_avg_j, del, cr_thickness, h_right_avg_j, t_cr(j));
+%     [h_cr(:,j) h_cr_left(:,j) h_cr_right(:,j)] = criticalThicknesses_tempRes(deltaT, t, h_avg_j, del, cr_thickness, h_right_avg_j, h_left_avg_j, t_cr(j));
 %     h_cr((h_cr == 0))             = [];
 %     h_cr_left((h_cr_left(:,j) == 0))   = [];
 %     h_cr_right((h_cr_right(:,j) == 0)) = [];
@@ -87,14 +91,16 @@ for j = 1:length(t_cr)
 %         clear h_cr_right
 %         h_cr_final(j) = h_cr(j);
 %     end
-    h_cr_final(j) = 0.5*(h_cr_left(j) + h_cr_right(j));
+    h_cr_final(j) = h_cr_right(j);
     h_cr_final_FullFilmavg(j) = h_cr(j);
 end
 
 %% to calculate the drainage time when the average height goes below 200 nm and reaches 50 nm
 for j = 1:length(res_limit)
-    [drainageTime(j) drainageTime_right(j) drainageTime_left(j) drainageTime_right_rupt(j) drainageTime_left_rupt(j)] = ...
-        drainageTimes(del,t,h_avg_j, h_right_avg_j(:,j), h_left_avg_j(:,j), h_drain_start, h_drain_end, cr_thickness);
+    [drainageTime(j) drainageTime_right(j) drainageTime_right_rupt(j) beginDrainageTime_right(j) endDrainageTime_right(j)] = ...
+                                                            drainageTimes(del,t,h_avg_j, h_right_avg_j(:,j), h_drain_start, h_drain_end, cr_thickness);
+%     [drainageTime(j) drainageTime_right(j) drainageTime_left(j) drainageTime_right_rupt(j) drainageTime_left_rupt(j)] = ...
+%         drainageTimes(del,t,h_avg_j, h_right_avg_j(:,j), h_left_avg_j(:,j), h_drain_start, h_drain_end, cr_thickness);
 end
 
 hfig1 = figure;

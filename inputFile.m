@@ -18,20 +18,21 @@ set(0, 'defaulttextInterpreter','latex');
 % filmConfiguration = 'semiInfiniteNonFlatFilms';
 
 %%%%% finite sized films with curvature on both sides  %%%%%%
-% filmConfiguration = 'finiteSizedNonFlatFilms';
+filmConfiguration = 'finiteSizedNonFlatFilms2D';
 
 %%%%% axis-symmetric case
-filmConfiguration = 'axisSymmetricFilm';
+% filmConfiguration = 'axisSymmetricFilm';
 
 %% Do we switch off the disjoining pressure in the solver?
 
 disjPress_switch = 'on';
 
-
 %% Based on the choice a part of this code gets executed
 
 switch filmConfiguration
     case {'flatFilms_PBC', 'semiInfiniteNonFlatFilms'} 
+        mkdir(filmConfiguration)
+        cd(filmConfiguration)
         kappa = 100;
         Tmp = 0.0;
         L_flat = 20;  
@@ -51,8 +52,12 @@ switch filmConfiguration
 
         if isequal(disjPress_switch, 'on') 
             cutOff_thickness = 1e-05;            % keep it lower to be able to probe even smaller thicknesses if it reaches 
+            mkdir('disjPress_on')
+            cd('disjPress_on')
         elseif isequal(disjPress_switch, 'off') 
             cutOff_thickness = 0.05;             % since the thinning rate in the absence of disj pres decreases asymptotically, a higher cut-off would save computational time
+            mkdir('disjPress_off')
+            cd('disjPress_off')
         end
      
         deltaX = 0.005;
@@ -80,14 +85,16 @@ switch filmConfiguration
         main_flatOrSemiInfiniteFilms(filmConfiguration,disjPress_switch, kappa, L_flat, deltaX, deltaT, transitionLength, ctimestep, Tmp, L_curv,...
             endTime, seN, N_Reals, startRealization, cutOff_thickness)
         cd ..
-    case 'finiteSizedNonFlatFilms'
+    case 'finiteSizedNonFlatFilms2D'
+        mkdir(filmConfiguration)
+        cd(filmConfiguration)
         %% raw conditions from the paper
-        R_film = [20 25 30 35 40 50 60 65 70 75 80 85 90 100 115 150 200 300 400 500 600 700 800 900 1000];   % radius of the film
-%         R_film = [800 900 1000];
+%         R_film = [20 25 30 35 40 50 60 65 70 75 80 85 90 100 115 150 200 300 400 500 600 700 800 900 1000];   % radius of the film
+        R_film = [30];
         R_f = R_film.*10^-6;              % in m
-        h0_init = 800e-9;                % initial film height in m
-        A_vw = 2e-21;                   % Hamaker constant
-        gam = 0.034;                     % surface tension
+        h0_init = 500e-9;                % initial film height in m
+        A_vw = 1.5e-20;                   % Hamaker constant
+        gam = 0.0445;                     % surface tension
         Rc = 1.8e-3;                      % radius of capillary
         visc = 0.00089;                   % viscosity
         t_cr_dimensional = [2 3 4 5];     % time resolution (in sec) 
@@ -144,7 +151,7 @@ switch filmConfiguration
         Tmp = 0.0;                          % dimensionless noise strength (= 0, for deterministic)
         upperLimitOnL_curv = sqrt(pi*h0_init^2*gam/(2*A_vw*kappa));
         lowerLimitOnL_curv = 1./sqrt(2*kappa);
-        transitionLength = 0.5*lowerLimitOnL_curv;
+        transitionLength = 1*lowerLimitOnL_curv;
         L_curv = 15*lowerLimitOnL_curv;                       % length of the curved portion of the film, for kappa > 1, one needs a smaller value of of L_curv
         endTime = 0.0001;
         
@@ -161,23 +168,27 @@ switch filmConfiguration
         
         if isequal(disjPress_switch, 'on') 
             cutOff_thickness = 1e-05;            % keep it lower to be able to probe even smaller thicknesses if it reaches 
+            mkdir('disjPress_on')
+            cd('disjPress_on')
         elseif isequal(disjPress_switch, 'off') 
             cutOff_thickness = 0.01;             % since the thinning rate in the absence of disj pres decreases asymptotically, a higher cut-off would save computational time
+            mkdir('disjPress_off')
+            cd('disjPress_off')
         end
+        
+        
+        %% parent folder
+        
+        mk = strcat('Testh0_',num2str(h0_init*10^9),'nm','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc), '_disjPr_',disjPress_switch);
+        mkdir(mk);
+        cd(mk);
+        copyfile('../../../*.m', '.')
+        copyfile('../../../dataRadoev1984.xlsx', '.')
         
         %% plot the first film length
         [h x] = initialProfile(kappa,L_flat(1),L_curv,transitionLength,deltaX(1),filmConfiguration);
         plot(x,h,'o')
         ylim([0.95 5])
-        
-        %% parent folder
-        
-        mk = strcat('h0_',num2str(h0_init*10^9),'nm','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc), '_disjPr_',disjPress_switch);
-        mkdir(mk);
-        cd(mk);
-        copyfile('../*.m', '.')
-        copyfile('../dataRadoev1984.xlsx', '.')
-        
         %% start simulations for different radii of films
 
         for i = 1:length(L_flat)
@@ -188,7 +199,7 @@ switch filmConfiguration
             copyfile('*.m', destinatn)
             run_mainFiles{i} = strcat('./',num2str(str1{i}));
             cd(run_mainFiles{i})
-            [t_rupt(i) drainageTime(i) drainageTime_left(i) drainageTime_right(i) drainageTime_right_rupt(i) drainageTime_left_rupt(i) ...
+            [t_rupt(i) drainageTime(i) drainageTime_right(i) drainageTime_right_rupt(i)  ...
             avg_cr_thinningRate_fit(i) h_cr_final(:,i) h_cr_final_FullFilmavg(:,i)] = main_finiteSizedFilms(filmConfiguration, disjPress_switch, ...
                         R_f(i), h0_init, A_vw, gam, Rc, visc, L_flat(i), N_flat(i), deltaX(i), deltaT(i), transitionLength, h_drain_start,...
                         h_drain_end, h_critical_start, h_critical_end, t_cr_dimensional, res_limit, ctimestep(i), Tmp, L_curv, endTime, seN(i),...
@@ -206,14 +217,14 @@ switch filmConfiguration
         postProcessFiniteSizedFilms();
         
     case 'axisSymmetricFilm'
-        mkdir('axisSymmetricFilm')
-        cd('axisSymmetricFilm')
-%         R_film = [10 15 20 25 30 35 40 50 60 65 70 75 80 85 90 100 115 150 200 300 400 500 600 700 800 900 1000];   % radius of the film
-        R_film = [50];
+        mkdir(filmConfiguration)
+        cd(filmConfiguration)
+%         R_film = [20 25 30 35 40 50 60 65 70 75 80 85 90 100 115 150 200 300 400 500 600 700 800 900 1000];   % radius of the film
+        R_film = [30];
         R_f = R_film.*10^-6;              % in m
-        h0_init = 300e-9;                % initial film height in m
-        A_vw = 2e-21;                   % Hamaker constant
-        gam = 0.034;                     % surface tension
+        h0_init = 500e-9;                 % initial film height in m
+        A_vw = 1.5e-20;                   % Hamaker constant
+        gam = 0.0445;                      % surface tension
         Rc = 1.8e-3;                      % radius of capillary
         visc = 0.00089;                   % viscosity
         t_cr_dimensional = [2 3 4 5];     % time resolution (in sec) 
@@ -230,7 +241,7 @@ switch filmConfiguration
         res_limit = res_limit_dimensional/l_scale;      % spatial resolution (scaled)
         h_drain_start = 100e-9/h0_init;                 % 100nm as mentioned in Wasan & Malhotra (1987)
         h_drain_end = 25e-9/h0_init;                    % 25 nm as mentioned in Wasan & Malhotra (1987)
-        hJoyeStart = 0.7;                                 % determine when to start measuring thinning rates
+        hJoyeStart = 0.8;                               % determine when to start measuring thinning rates
         hJoyeEnd = 0.627*kappa^(-2/7);                  % where to end
         h_critical_start = 0.627*kappa^(-2/7)*1.2;      % this is when the film thinning velocity starts becoming nearly constant
         h_critical_end = 0.627*kappa^(-2/7)*0.8;        % this is when the film thinning velocity ends becoming nearly constant
@@ -257,11 +268,19 @@ switch filmConfiguration
         upperLimitOnL_curv = sqrt(2*Rc/h0_init) + sqrt(2*Rc/h0_init - L_flat.^2);
         lowerLimitOnL_curv = sqrt(h0_init*Rc)./l_scale;
         transitionLength = lowerLimitOnL_curv;
-        L_curv = 15*lowerLimitOnL_curv;                       % length of the curved portion of the film, for kappa > 1, one needs a smaller value of of L_curv
-        endTime = 1000;
+        L_curv = 10*lowerLimitOnL_curv;                       % length of the curved portion of the film, for kappa > 1, one needs a smaller value of of L_curv
+        endTime = 10000;
         
         N_Reals = 1;                        % number of realizations
-        animationSkip = 50;                 % save animation every these many time steps
+        for i = 1:length(R_film)
+            if R_film(i) < 50
+                seN(i) = 50;                            % save every these many time steps
+                animationSkip(i) = 100;                 % save animation every these many time steps
+            else
+                seN(i) = 20;                            % save every these many time steps
+                animationSkip(i) = 100;                  % save animation every these many time steps
+            end
+        end
         startRealization = 1;               % first realization
 
 %         for i = 1:length(L_flat)
@@ -284,20 +303,27 @@ switch filmConfiguration
         
         %% parent folder
         
-        mk = strcat('h0_',num2str(h0_init*10^9),'nm','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc), '_disjPr_',disjPress_switch);
+        mk = strcat('Testh0_',num2str(h0_init*10^9),'nm','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc), '_disjPr_',disjPress_switch);
         mkdir(mk);
         cd(mk);
         copyfile('../../../*.m', '.')
         copyfile('../../../dataRadoev1984.xlsx', '.')
         
          %% plot the first film length
+         hfig = figure;
+         hfig.Renderer = 'Painters';
         [h x] = initialProfile(kappa,L_flat(1),L_curv,transitionLength,deltaX(1),filmConfiguration);
-        plot(x,h,'o')
-        ylim([0 3])
+        area(x*l_scale*10^6,h*h0_init*10^9)
+        ylim([0 800])
+        
+        set(hfig,'Units','Inches');
+        pos = get(hfig,'Position');
+        set(hfig,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
+        print(hfig,'initialProfile','-dpdf','-r300')
         
         %% start simulations for different radii of films
 
-        for i = 1:length(L_flat)
+      for i = 1:length(L_flat)
             str1{i} = strcat('Rf_', num2str(R_film(i)),'_mu_m');
             mkdir(str1{i});
             path_dest{i} = strcat('./', num2str(str1{i}));
@@ -305,11 +331,11 @@ switch filmConfiguration
             copyfile('*.m', destinatn)
             run_mainFiles{i} = strcat('./',num2str(str1{i}));
             cd(run_mainFiles{i})
-            [t_rupt(i) drainageTime(i) drainageTime_left(i) drainageTime_right(i) drainageTime_right_rupt(i) drainageTime_left_rupt(i) ...
+            [t_rupt(i) drainageTime(i) drainageTime_right(i) drainageTime_right_rupt(i) ...
             avg_cr_thinningRate_fit(i) h_cr_final(:,i) h_cr_final_FullFilmavg(:,i)] = main_axisSymmetryFilm(filmConfiguration, disjPress_switch, ...
                         R_f(i), h0_init, A_vw, gam, Rc, visc, L_flat(i), N_flat(i), deltaX(i), deltaT(i), transitionLength, h_drain_start,...
-                        h_drain_end, h_critical_start, h_critical_end, t_cr_dimensional, res_limit, ctimestep(i), Tmp, L_curv, endTime, seN(i),...
-                        N_Reals, animationSkip, startRealization, hJoyeStart, hJoyeEnd, cutOff_thickness);
+                        h_drain_end, h_critical_start, h_critical_end, t_cr_dimensional, res_limit, ctimestep, Tmp, L_curv, endTime, seN(i),...
+                        N_Reals, animationSkip(i), startRealization, hJoyeStart, hJoyeEnd, cutOff_thickness);
 
             
             cd ..
@@ -318,11 +344,15 @@ switch filmConfiguration
         end
         save('results_differentFilmSize.mat')
         
+        %% post process finite sized films
+        
+        postProcessFiniteSizedFilms();
+        
 end
 
 save('workspaceInputParameters.mat')
 
-cd ..
+cd ../../..
 
 toc
 

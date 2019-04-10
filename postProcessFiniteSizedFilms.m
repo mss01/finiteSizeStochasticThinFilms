@@ -1,4 +1,7 @@
 function postProcessFiniteSizedFilms()
+clear all
+clc
+close all
 
 h_dimensionless = [0.05:0.05:1]';  % dimensionless film thickness vector --> will be used in the calculation of theoretical velocities
 
@@ -10,7 +13,7 @@ end
 % turn everything into dimensional quantities
 t_rupt_det = t_rupt.*t_scale;
 t_drain_det_wholeFilm = drainageTime.*t_scale;
-t_drain_det_left = drainageTime_left.*t_scale;
+% t_drain_det_left = drainageTime_left.*t_scale;
 t_drain_det_right = drainageTime_right.*t_scale;
 v_thin_min_det = abs(avg_cr_thinningRate_fit).*h0_init*10^10./t_scale;
 h_cr_det_final = h_cr_final.*h0_init*10^10;
@@ -52,7 +55,7 @@ errorbar(R_manev, t_drain_2ndData, std_t_drain_2ndData, 'd')
 set(gca, 'XScale','log')
 set(gca, 'YScale','log')
 hold on
-loglog(R_film, t_drain_det_left, 'o')
+loglog(R_film, t_drain_det_right, 'o')
 xlabel('$R_{film}$ ($\mu$m)','Fontsize',14)
 ylabel('$t_{drain}$ (s)','Fontsize',14)
 hold on 
@@ -60,7 +63,7 @@ loglog(R_film, t_re, 'o')
 hold on
 loglog(R_film, t_MTR,'o')
 set(gca,'FontSize',16)
-ylim([0.1*min(t_drain_det_left) 10*max(t_drain_det_left)])
+ylim([0.1*min(t_drain_det_right) 10*max(t_drain_det_right)])
 xlim([10 1100])
 legend('Manev - DS1', 'Manev - DS2','$\theta$ = 0','Reynolds theory','MTR theory','Location','best')
 
@@ -80,9 +83,9 @@ errorbar(L_film_Radoev_sort*10^6, v_thin_Radoev_sort, std_v_thin_Radoev, 'o')
 set(gca, 'Xscale', 'log')
 set(gca, 'Yscale', 'log')
 hold on
-loglog(R_film, v_re_det(:,7),'o')
+loglog(R_film, v_re_det(2,:),'o')
 hold on
-loglog(R_film, v_MTR(:,7),'o')
+loglog(R_film, v_MTR(:,2),'o')
 xlabel('$R_{film}$ ($\mu$m)','Fontsize',14)
 ylabel('$V$ ($\AA/s$)','Fontsize',14)
 set(gca,'FontSize',16)
@@ -92,8 +95,8 @@ legend('thinning rate, $\theta = 0$', 'Radoev thin rate', 'Reynolds thinning rat
 
 set(h2b,'Units','Inches');
 pos = get(h2b,'Position');
-set(h2b,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
-print(h2b,figureName_thRates,'-dpdf','-r300')
+set(h2b,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)]);
+print(h2b,figureName_thRates,'-dpdf','-r300');
 
 
 h2c = figure;
@@ -104,9 +107,9 @@ plot(R_film, v_thin_min_det, 'o')
 hold on
 errorbar(L_film_Radoev*10^6, v_thin_Radoev_sort, std_v_thin_Radoev, 'o')
 hold on
-plot(R_film, v_re_det(:,7),'o')
+plot(R_film, v_re_det(2,:),'o')
 hold on
-plot(R_film, v_MTR(:,7),'o')
+plot(R_film, v_MTR(:,2),'o')
 ylim([0.1*min(v_thin_min_det) 10*max(v_thin_min_det)])
 xlim([10 1100])
 xlabel('$R_{film}$ ($\mu$m)','Fontsize',14)

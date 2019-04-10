@@ -90,7 +90,7 @@ for i = 1:length(t_range)      % time marching
 %     noi2 = (g(1:h_size-3) + g(2:h_size-2))./2;
 
     switch filmConfiguration
-        case {'flatFilms_PBC', 'semiInfiniteNonFlatFilms', 'finiteSizedNonFlatFilms'} 
+        case {'flatFilms_PBC', 'semiInfiniteNonFlatFilms', 'finiteSizedNonFlatFilms2D'} 
             h1_r = 2*h(k(3:h_adjusted-2)).^2.*h(k(4:h_adjusted-1)).^2./(h(k(3:h_adjusted-2))+h(k(4:h_adjusted-1)));
 
             h1_l = 2*h(k(3:h_adjusted-2)).^2.*h(k(2:h_adjusted-3)).^2./(h(k(3:h_adjusted-2))+h(k(2:h_adjusted-3)));
@@ -139,7 +139,7 @@ for i = 1:length(t_range)      % time marching
 %                 b = [2*kappa*deltaX^2; kappa*x(2)^2+1; h(3:h_adjusted-2)-p1*(h2_r - h2_l) + p3.*(sqrt(h1_r).*noi_r - sqrt(h1_l).*noi_l); 0; 0];
 %             end
                 b = [2*kappa*deltaX^2; kappa*x(2)^2+1; h(3:h_adjusted-2)-p1*(h2_r - h2_l) + p3.*(sqrt(h1_r).*noi_r - sqrt(h1_l).*noi_l); 0; 0];
-        case 'finiteSizedNonFlatFilms'
+        case 'finiteSizedNonFlatFilms2D'
 %             if Tmp == 0
 %                 b = [2*kappa*deltaX^2; kappa*(x(2)+L_flat)^2+1; h(3:h_adjusted-2)-p1*(h2_r - h2_l); kappa*(x(end-1)-L_flat)^2+1 ; 2*kappa*deltaX^2];
 %             else

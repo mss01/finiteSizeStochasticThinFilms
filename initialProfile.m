@@ -14,7 +14,7 @@ switch filmConfiguration
         h1_dom = 1 + kappa*x1.^2; % + 10^-3.*(1 - 2.*rand(1,length(x1)));          % height for the curved portion
         h2_dom = ones(max(size(x2)),1)'; % + 10^-3.*(1 - 2.*rand(1,length(x2)));   % height of the flat potion
         h = [h1_dom h2_dom];              % full domain 
-    case 'finiteSizedNonFlatFilms'
+    case 'finiteSizedNonFlatFilms2D'
         x1 = [-transitionLength-deltaX:-deltaX:-L_curv-deltaX];
         x1 = fliplr(x1);
         x2 = [-transitionLength:deltaX:transitionLength];

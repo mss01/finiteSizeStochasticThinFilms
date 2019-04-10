@@ -1,18 +1,49 @@
 function [v_re_det t_re v_MTR t_MTR v_MTR_1997Paper v_MTR_Tsekov] = Reynolds_and_MTR(h_dimensionless, kappa, L_flat, R_f, h0_init,...
                                                                     t_scale, h_drain_start, h_drain_end, visc, gam, Rc, A_vw)
 
-v_re_det = ((1 + 6.*h_dimensionless.^3*kappa)./(L_flat).^2)'*h0_init/t_scale*10^10;
-preFactorFunc = @(x) 1./(1+6.*kappa.*x.^3);
-preFactorRe = integral(preFactorFunc, h_drain_end ,h_drain_start);
-t_re = preFactorRe.*L_flat.^2.*t_scale;             %% preFactorRe is coming from integrating 1/(1 + 6h^3*kappa) from 100nm to 25nm
 
-% MTR theory
+%% for 2-d case with the scaling as done in JFM paper-1
+% v_re_det = ((1 + 6.*h_dimensionless.^3*kappa)./(L_flat).^2)'*h0_init/t_scale*10^10;
+
+% preFactorFunc = @(x) 1./(1+6.*kappa.*x.^3);
+% preFactorRe = integral(preFactorFunc, h_drain_end ,h_drain_start);
+% t_re = preFactorRe.*L_flat.^2.*t_scale;             %% preFactorRe is coming from integrating 1/(1 + 6h^3*kappa) from 100nm to 25nm
+
+%% for axis-symmetry case with scaling as per the boundary condition
+v_re_det = 4.*h_dimensionless.^3./(L_flat).^2.*(1 + 1./(6.*kappa.*h_dimensionless.^3)).*h0_init./t_scale.*10^10;
+
+preFactorFunc = @(x) 1./(4.*x.^3.*(1+1./(6.*kappa.*x.^3)));
+preFactorRe = integral(preFactorFunc, h_drain_end ,h_drain_start);
+t_re = preFactorRe.*L_flat.^2.*t_scale;            %% preFactorRe is coming from integrating 1/(1 + 6h^3*kappa) from 100nm to 25nm
+
+
+% % MTR theory for 2-d case with the scaling as done in JFM paper-1
+% % v_MTR = (((1 + 6*kappa)^8.*h_dimensionless.^12)./(3.*L_film_scaled.^4)).^0.2*h0_init/t_scale*10^10;
+% for i = 1:length(h_dimensionless)
+%     v_MTR(:,i) = 1/6.*(((1 + 6*kappa.*h_dimensionless(i).^3).^8)./(108.*h_dimensionless(i).^12*L_flat.^4)).^0.2*h0_init/t_scale*10^10;
+% end
+
+% MTR theory for 2-d case with the scaling as done in JFM paper-1
+% v_MTR = (((1 + 6*kappa)^8.*h_dimensionless.^12)./(3.*L_film_scaled.^4)).^0.2*h0_init/t_scale*10^10;
+% for i = 1:length(h_dimensionless)
+%     v_MTR(:,i) = 1/6.*(((1 + 6*kappa.*h_dimensionless(i).^3).^8)./(108.*h_dimensionless(i).^12*L_flat.^4)).^0.2*h0_init/t_scale*10^10;
+% end
+%% for axis-symmetric case with scaling as per the boundary condition
+
 % v_MTR = (((1 + 6*kappa)^8.*h_dimensionless.^12)./(3.*L_film_scaled.^4)).^0.2*h0_init/t_scale*10^10;
 for i = 1:length(h_dimensionless)
-    v_MTR(:,i) = 1/6.*(((1 + 6*kappa.*h_dimensionless(i).^3).^8)./(108.*h_dimensionless(i).^12*L_flat.^4)).^0.2*h0_init/t_scale*10^10;
+    v_MTR(:,i) = 1/2.*((h_dimensionless(i)^12./L_flat.^4).*(1 + 1./(6*kappa*h_dimensionless(i).^3).^8)).^0.2*h0_init/t_scale*10^10;
 end
 
-preFactorFuncMTR = @(y) 6.*(108.*y.^12).^(1/5)./(1+6.*kappa.*y.^3).^(8/5);
+% preFactorFuncMTR = @(y) 6.*(108.*y.^12).^(1/5)./(1+6.*kappa.*y.^3).^(8/5);
+% % preFactorFuncMTR = @(y) 1./(1+6.*kappa.*y.^3);
+% 
+% preFactorMTR = integral(preFactorFuncMTR, h_drain_end ,h_drain_start);
+% t_MTR = preFactorMTR.*(L_flat.^4.).^(1/5).*t_scale;
+
+%% for axis-symmetric case with scaling as per the boundary condition
+
+preFactorFuncMTR = @(y) 2./(y.^12.*(1+1./(6.*kappa.*y.^3)).^8).^(1/5);
 % preFactorFuncMTR = @(y) 1./(1+6.*kappa.*y.^3);
 
 preFactorMTR = integral(preFactorFuncMTR, h_drain_end ,h_drain_start);

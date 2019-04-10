@@ -1,11 +1,11 @@
-function [h_cr h_cr_left h_cr_right] = criticalThicknesses_tempRes(deltaT, t, h_avg_j, del, cr_thickness, h_right_avg_j, h_left_avg_j, t_cr);
+function [h_cr h_cr_right] = criticalThicknesses_tempRes(deltaT, t, h_avg_j, del, cr_thickness, h_right_avg_j, t_cr);
+% function [h_cr h_cr_left h_cr_right] = criticalThicknesses_tempRes(deltaT, t, h_avg_j, del, cr_thickness, h_right_avg_j, h_left_avg_j, t_cr);
 
 for i = 1:length(t)
     if (t(i) - (t(end) - t_cr)) <= deltaT
         t_crit = t(i);
         h_cr = h_avg_j(i);
         h_cr_right = h_right_avg_j(i);
-        h_cr_left = h_left_avg_j(i);
     end
 end
 

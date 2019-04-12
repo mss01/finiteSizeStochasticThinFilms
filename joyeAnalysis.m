@@ -43,12 +43,12 @@ switch filmConfiguration
     case 'axisSymmetricFilm'
         %% the following is based on cylindrical coordinates and accounting for both Laplace pressure and disjoining pressure
         if isequal(disjPress_switch, 'on') 
-            v_re_Joye = 4*h_min_rim.^3./L_flat^2.*(1 + 1./(6*kappa*h_min_rim.^3));
-            v_re_Joye_centre = 4*h_centre_Joye.^3./L_flat^2.*(1 + 1./(6*kappa*h_centre_Joye.^3));
+            v_re_Joye = 16*h_min_rim.^3./L_flat^2.*(1 + 1./(6*kappa*h_min_rim.^3));                     
+            v_re_Joye_centre = 16*h_centre_Joye.^3./L_flat^2.*(1 + 1./(6*kappa*h_centre_Joye.^3));
         else isequal(disjPress_switch, 'off') 
             %% this is based on cylindrical coordinates and for only Laplace pressure
-            v_re_Joye = 4*h_min_rim.^3./L_flat^2;   
-            v_re_Joye_centre = 4*h_centre_Joye.^3./L_flat^2;
+            v_re_Joye = 16*h_min_rim.^3./L_flat^2;   
+            v_re_Joye_centre = 16*h_centre_Joye.^3./L_flat^2;
         end     
 end
 %% the following is based on cylindrical coordinates and accounting for both Laplace pressure and disjoining pressure based on the earlier scaling with dominant wavelength

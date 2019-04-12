@@ -1,5 +1,5 @@
 function [t_rupt drainageTime drainageTime_right drainageTime_right_rupt ...
-    avg_cr_thinningRate_fit h_cr_final h_cr_final_FullFilmavg] = main_axisSymmetryFilm(filmConfiguration, disjPress_switch, R_f, h0_init, A_vw, gam, Rc, visc, L_flat, N_flat, deltaX, deltaT, transitionLength, h_drain_start, h_drain_end, h_critical_start,...
+    avg_cr_thinningRate_fit h_cr_final h_cr_final_FullFilmavg] = main_axisSymmetryFilm(filmConfiguration, disjPress_switch, R_f, h0_init, A_vw, c1, c2, gam, Rc, visc, L_flat, N_flat, deltaX, deltaT, transitionLength, h_drain_start, h_drain_end, h_critical_start,...
                 h_critical_end, t_cr_dimensional, res_limit, ctimestep, Tmp, L_curv, endTime, seN, N_Reals, animationSkip, ...
                 startRealization, hJoyeStart, hJoyeEnd, cutOff_thickness)
 
@@ -10,6 +10,10 @@ kappa = pi*h0_init^3*gam/A_vw/Rc;
 t_scale = 3*visc*Rc^2/(gam*h0_init);
 l_scale = sqrt(Rc*h0_init/2);
 t_cr = t_cr_dimensional./t_scale;
+rep_coeff = c1;
+rep_expon = c2;
+% rep_coeff = c1*Rc/(2*gam);
+% rep_expon = c2*h0_init;
 
 %% simulation set-up
 
@@ -24,8 +28,8 @@ subplot(2,1,1)
 plot(x,h)
 % ylim([0 5])
 subplot(2,1,2)
-plot(x,h,'o')
-ylim([0.95 1.5])
+plot(x*l_scale*10^6,h*h0_init*10^9,'o')
+% ylim([0.95 1.5])
 
 set(hfig,'Units','Inches');
 pos = get(hfig,'Position');
@@ -58,7 +62,7 @@ for m = 1:N_Reals
     A(h_adjusted^2) = 0.5*(x(h_adjusted) + x(h_adjusted - 1))/x(h_adjusted - 1);
     %% call the solver
 
-    [t_rupt(m) x_rupt(m) minH(:,m)] = filmSolver(filmConfiguration, disjPress_switch, L_flat,transitionLength,L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN, cutOff_thickness);
+    [t_rupt(m) x_rupt(m) minH(:,m)] = filmSolver(filmConfiguration, disjPress_switch, rep_coeff, rep_expon, L_flat,transitionLength,L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN, cutOff_thickness);
 
     reali_series(m) = m;
     realization = realization + 1;

@@ -1,6 +1,6 @@
 function [h_right_avg_j h_min h_centre_j v_thin_rim v_thin_centre avg_cr_thinningRate_fit h_cr_final ...
     h_cr_final_FullFilmavg drainageTime drainageTime_right drainageTime_right_rupt t_rupt h_max_dimp_r...
-    beginDrainageTime_right endDrainageTime_right x_dimple_loc_right] = loopingOverRealizations(x, L_flat, transitionLength, tt, x_centre, ...
+    beginDrainageTime_right endDrainageTime_right x_dimple_loc_right] = loopingOverRealizations(x, h0_init, L_flat, transitionLength, tt, x_centre, ...
                                         locDimple_right, res_limit, cr_thickness, h_drain_start, h_drain_end, ...
                                         t_cr, deltaX, deltaT, h_critical_start, h_critical_end);
                                     
@@ -107,6 +107,8 @@ hfig1 = figure;
 plot(t(2:end), h_avg);
 hold on
 plot(t(2:end), h_right_avg_j)
+yline(h_drain_start,'-.k','LineWidth',1.5);
+yline(h_drain_end,':k','LineWidth',1.5);
 xlabel('time','Fontsize',14)
 ylabel('$<h>$','Fontsize',14)
 legend('$<h(R)>$','$<h(probe)>$')

@@ -1,5 +1,5 @@
 function makeAnimation_det(filmConfiguration, animationSkip,kappa, L_flat, L_curv, transitionLength,deltaX, ...
-                            h_store, t_store, h0_init, t_scale, l_scale, beginDrainageTime_right, endDrainageTime_right, x_dimple_loc_right, res_limit)
+                            h_store, t_store, h0_init, t_scale, l_scale, beginDrainageTime_right, endDrainageTime_right, x_dimple_loc_right, res_limit, h_drain_start, h_drain_end)
 
 [h x] = initialProfile(kappa,L_flat,L_curv,transitionLength,deltaX, filmConfiguration);
 h_all = [h h_store];
@@ -30,7 +30,7 @@ j = 1;
 while i <= q
     Y = h_all(:,i);
     M(:,:,:,j) = video_plot(L_flat, x,Y, t_new(i), h0_init, t(i), t_scale, l_scale, beginDrainageTime_right, ...
-                            endDrainageTime_right, x_dimple_loc_right(i), res_limit, deltaX);
+                            endDrainageTime_right, x_dimple_loc_right(i), res_limit, deltaX, h_drain_start, h_drain_end);
     i = i + animationSkip;
     j = j + 1;
 end

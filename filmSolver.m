@@ -1,4 +1,4 @@
-function [t_rupt x_rupt minH] = filmSolver(filmConfiguration, disjPress_switch, L_flat,transitionLength,L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN, cutOff_thickness);
+function [t_rupt x_rupt minH] = filmSolver(filmConfiguration, disjPress_switch, rep_coeff, rep_expon, L_flat,transitionLength,L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN, cutOff_thickness);
 
 
 tic
@@ -78,6 +78,8 @@ rng shuffle                        % change the seed every new realization
 t_range = deltaT:deltaT:endTime;
 saver = 1;
 for i = 1:length(t_range)      % time marching
+    minH_tm1 = min(h(:));
+
     t = i*deltaT;
 
     R = randn(N+1,1);              % random numbers for each grid point (changes every time)
@@ -151,11 +153,17 @@ for i = 1:length(t_range)      % time marching
             
                 b = [0; 0; h(3:h_adjusted-2) ...
                             + p1./(12*kappa.*x(k(3:h_adjusted-2))).*((h1_r./h(k(4:h_adjusted-1)).^3) - (h1_r + h1_l)./h(k(3:h_adjusted-2)).^3 ...
-                                            + h1_l./h(k(2:h_adjusted-3)).^3); 1+(x(end-1)^2 - L_flat^2)./4 + L_flat^2/2*log(L_flat/x(end-1)); ...
+                                            + h1_l./h(k(2:h_adjusted-3)).^3) ...
+                                            - p1./x(k(3:h_adjusted-2)).*(h1_r.*rep_coeff.*exp(-rep_expon.*h(k(4:h_adjusted-1))) ...
+                                                                        -  (h1_r + h1_l).*rep_coeff.*exp(-rep_expon.*h(k(3:h_adjusted-2))) ...
+                                                                        +   h1_l.*rep_coeff.*exp(-rep_expon.*h(k(2:h_adjusted-3)))); ...
+                                            1+(x(end-1)^2 - L_flat^2)./4 + L_flat^2/2*log(L_flat/x(end-1)); ...
                                             deltaX^2];
     end
-    
+
     h = A\b;
+    
+
 
 %======================================================================
 %               Save data after every few time steps
@@ -168,9 +176,18 @@ for i = 1:length(t_range)      % time marching
     if(flag==seN)
         h_store(:,saver) = h;
         t_store(saver) = t;
+%         minH_cutOff(:,saver) = min(h(:));
+%         if minH_cutOff(:,saver-1) - minH_cutOff(:,saver) <= 1e-12;
+%             break;
+%         else
+%             continue;
+%         end
+
         flag=0;
 %         dlmwrite(sprintf('Data_%1.15f.txt',t),h,'precision','%.16f','delimiter','\t')    % save it as a txt file to be used in matlab post processing script
         saver = saver + 1;
+        
+
     end
     if min(h(:)) <= cutOff_thickness
 %         dlmwrite(sprintf('Data_%1.15f.txt',t),h,'precision','%.16f','delimiter','\t')      % write the last file because it becomes important especially for high kappa values in the late regime
@@ -181,10 +198,6 @@ for i = 1:length(t_range)      % time marching
         continue
     end
     
-t
-h_store
-t_store
-
 %  some check to ensure if any realization has given singular matrix, Matlab gives this warning away anyway, so have commented it for now.       
 %     if(rcond(full(A)) < 1e-12)
 %         break

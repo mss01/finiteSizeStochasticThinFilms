@@ -1,4 +1,4 @@
-function M = video_plot(L_flat, x, Y, t_new, h0_init, t, t_scale, l_scale, beginDrainageTime_right, endDrainageTime_right, x_dimple_loc_right, res_limit, deltaX)
+function M = video_plot(L_flat, x, Y, t_new, h0_init, t, t_scale, l_scale, beginDrainageTime_right, endDrainageTime_right, x_dimple_loc_right, res_limit, deltaX, h_drain_start, h_drain_end)
 
 set(groot, 'defaultAxesTickLabelInterpreter','latex'); 
 set(groot, 'defaultLegendInterpreter','latex');
@@ -15,10 +15,10 @@ xlabel('r ($\mu$m)','Fontsize',16);
 ylabel('h (nm)','Fontsize',16);
 set(gca,'FontSize',18);
 if t >= beginDrainageTime_right*t_scale
-    yline(100,'-.k','LineWidth',1.5);
+    yline(h_drain_start*h0_init*10^9,'-.k','LineWidth',1.5);
 end
 if t >= endDrainageTime_right*t_scale
-    yline(25,':k','LineWidth',1.5);
+    yline(h_drain_end*h0_init*10^9,':k','LineWidth',1.5);
 end
 legend(t_new);
 M = print('-RGBImage',sprintf('-r%d',150)); %% 150 = resolution, normally gives a good animation, and also occupies less space

@@ -107,11 +107,13 @@ hfig1 = figure;
 plot(t(2:end), h_avg);
 hold on
 plot(t(2:end), h_right_avg_j)
-yline(h_drain_start,'-.k','LineWidth',1.5);
-yline(h_drain_end,':k','LineWidth',1.5);
-xlabel('time','Fontsize',14)
-ylabel('$<h>$','Fontsize',14)
-legend('$<h(R)>$','$<h(probe)>$')
+yli1 = yline(h_drain_start,'-.k','h(t_d = 0)','LineWidth',1.5);
+yli.LabelHorizontalAlignment = 'center';
+yli2 = yline(h_drain_end,':k','h(t_d)','LineWidth',1.5);
+yli.LabelHorizontalAlignment = 'center';
+xlabel('t [-]','Fontsize',14)
+ylabel('$\langle h \rangle$ [-]','Fontsize',14)
+legend('$\langle h(R) \rangle$','$\langle h(probe) \rangle$')
 set(gca,'FontSize',14)
 
 set(hfig1,'Units','Inches');

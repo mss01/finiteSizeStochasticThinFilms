@@ -221,7 +221,7 @@ switch filmConfiguration
         mkdir(filmConfiguration)
         cd(filmConfiguration)
 %         R_film = [20 25 30 35 40 50 60 65 70 75 80 85 90 100 115 150 200 300 400 500 600 700 800 900 1000];   % radius of the film
-        R_film = [50];
+        R_film = [500];
         R_f = R_film.*10^-6;              % in m
         h0_init = 300e-9;                 % initial film height in m
         A_vw = 1.5e-20;                   % Hamaker constant
@@ -249,8 +249,8 @@ switch filmConfiguration
         
         %% domain size and discretization parameters
 
-        deltaX = 0.05*ones(size(R_f));             % grid size (tested for grid independent results)
-        L_flat = round(R_f./l_scale,2);            % length of the flat film
+        deltaX = 0.05*ones(size(R_f));             % grid size (tested for grid independent results
+        L_flat = round(R_f./l_scale,2);            % length of the flat film 
         N_flat = round(L_flat./deltaX);            % number of grid points in the same
         ctimestep = 2.75;                          % exponent used in deciding deltaT = deltaX^c --> although c = 2.75 suffices, but a higher temp resolution enables more time stamps
         seN = 20;                                  % save every seN time steps
@@ -298,7 +298,7 @@ switch filmConfiguration
             if isequal(repulsion_switch,'on')
                 mkdir('repulsion_on')
                 cd('repulsion_on')
-                c1 = 0.7;
+                c1 = 2;
                 c2 = 3;
 %                 c1 = 494.44;
 %                 c2 = 6e6;
@@ -312,12 +312,17 @@ switch filmConfiguration
             cutOff_thickness = 0.01;             % since the thinning rate in the absence of disj pres decreases asymptotically, a higher cut-off would save computational time
             mkdir('disjPress_off')
             cd('disjPress_off')
+            mkdir('repulsion_off')
+            cd('repulsion_off')
+            c1 = 0;
+            c2 = 0;
         end
         
         
         %% parent folder
         
-        mk = strcat('h0_',num2str(h0_init*10^9),'nm','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc), '_disjPr_',disjPress_switch,'100_25nm','_c1_',num2str(c1));
+        mk = strcat('h0_',num2str(h0_init*10^9),'nm','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc), ...
+                    '_disjPr_',disjPress_switch,'100_25nm','_c1_',num2str(c1),'_c2_',num2str(c2));
         mkdir(mk);
         cd(mk);
         copyfile('../../../../*.m', '.')

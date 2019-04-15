@@ -19,7 +19,7 @@ plot(t(2:end), h_min)
 hold on
 plot(t(2:end), h_centre_j)
 legend('$h_{min}$','$h_{centre}$')
-xlabel('$time$')
+xlabel('$t$')
 ylabel('$h_{min}$, $h_{centre}$')
 set(gca,'FontSize',14)
 

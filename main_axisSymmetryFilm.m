@@ -10,8 +10,8 @@ kappa = pi*h0_init^3*gam/A_vw/Rc;
 t_scale = 3*visc*Rc^2/(gam*h0_init);
 l_scale = sqrt(Rc*h0_init/2);
 t_cr = t_cr_dimensional./t_scale;
-rep_coeff = c1;
-rep_expon = c2;
+repulsion_coeff = c1;
+repulsion_expon = c2;
 % rep_coeff = c1*Rc/(2*gam);
 % rep_expon = c2*h0_init;
 
@@ -26,10 +26,14 @@ hfig = figure;
 hfig.Renderer = 'Painters';
 subplot(2,1,1)
 plot(x,h)
-% ylim([0 5])
+xlabel('r [-]')
+ylabel('$h [-]$')
+set(gca,'FontSize',16)
 subplot(2,1,2)
 plot(x*l_scale*10^6,h*h0_init*10^9,'o')
-% ylim([0.95 1.5])
+xlabel('r ($\mu$m)')
+ylabel('$h (nm)$')
+set(gca,'FontSize',16)
 
 set(hfig,'Units','Inches');
 pos = get(hfig,'Position');
@@ -62,7 +66,7 @@ for m = 1:N_Reals
     A(h_adjusted^2) = 0.5*(x(h_adjusted) + x(h_adjusted - 1))/x(h_adjusted - 1);
     %% call the solver
 
-    [t_rupt(m) x_rupt(m) minH(:,m)] = filmSolver(filmConfiguration, disjPress_switch, rep_coeff, rep_expon, L_flat,transitionLength,L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN, cutOff_thickness);
+    [t_rupt(m) x_rupt(m) minH(:,m)] = filmSolver(filmConfiguration, disjPress_switch, repulsion_coeff, repulsion_expon, L_flat,transitionLength,L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN, cutOff_thickness);
 
     reali_series(m) = m;
     realization = realization + 1;

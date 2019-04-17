@@ -27,6 +27,7 @@ filmConfiguration = 'axisSymmetricFilm';
 
 disjPress_switch = 'on';
 repulsion_switch = 'on';
+adhocRepulsion_switch = 'on';
 
 %% Based on the choice a part of this code gets executed
 
@@ -221,7 +222,7 @@ switch filmConfiguration
         mkdir(filmConfiguration)
         cd(filmConfiguration)
 %         R_film = [20 25 30 35 40 50 60 65 70 75 80 85 90 100 115 150 200 300 400 500 600 700 800 900 1000];   % radius of the film
-        R_film = [500];
+        R_film = [50 500];
         R_f = R_film.*10^-6;              % in m
         h0_init = 300e-9;                 % initial film height in m
         A_vw = 1.5e-20;                   % Hamaker constant
@@ -298,16 +299,44 @@ switch filmConfiguration
             if isequal(repulsion_switch,'on')
                 mkdir('repulsion_on')
                 cd('repulsion_on')
-                c1 = 2;
-                c2 = 3;
-%                 c1 = 494.44;
-%                 c2 = 6e6;
+                if isequal(adhocRepulsion_switch, 'on')
+                    mkdir('adhocRepulsion')
+                    cd('adhocRepulsion')
+                    c1 = 0;
+                    c2 = 0;
+                    c3 = 5e-9/h0_init;  
+                    %% parent folder
+        
+                    mk = strcat('h0_',num2str(h0_init*10^9),'nm','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc), ...
+                                '_disjPr_',disjPress_switch,'100_25nm','_c1_',num2str(c1),'_c2_',num2str(c2),'_hmin_',num2str(c3*h0_init*1e9)','nm');
+                    mkdir(mk);
+                    cd(mk);
+                    copyfile('../../../../../*.m', '.')
+                    copyfile('../../../../../dataRadoev1984.xlsx', '.')
+                elseif isequal(adhocRepulsion_switch, 'off')
+                    mkdir('electroRepulsion')
+                    cd('electroRepulsion')
+                    c1 = 2;
+                    c2 = 3;
+    %                 c1 = 494.44;
+    %                 c2 = 6e6;
+                    c3 = 0;
+                    %% parent folder
+        
+                    mk = strcat('h0_',num2str(h0_init*10^9),'nm','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc), ...
+                                '_disjPr_',disjPress_switch,'100_25nm','_c1_',num2str(c1),'_c2_',num2str(c2));
+                    mkdir(mk);
+                    cd(mk);
+                    copyfile('../../../../../*.m', '.')
+                    copyfile('../../../../../dataRadoev1984.xlsx', '.')
+                end
             elseif isequal(repulsion_switch,'off')
                 mkdir('repulsion_off')
                 cd('repulsion_off')
                 c1 = 0;
                 c2 = 0;
-            end    
+                c3 = 0;
+            end         
         elseif isequal(disjPress_switch, 'off') 
             cutOff_thickness = 0.01;             % since the thinning rate in the absence of disj pres decreases asymptotically, a higher cut-off would save computational time
             mkdir('disjPress_off')
@@ -316,29 +345,33 @@ switch filmConfiguration
             cd('repulsion_off')
             c1 = 0;
             c2 = 0;
+            c3 = 0;
+            mk = strcat('h0_',num2str(h0_init*10^9),'nm','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc), ...
+                        '_disjPr_',disjPress_switch,'100_25nm','_c1_',num2str(c1),'_c2_',num2str(c2));
+            mkdir(mk);
+            cd(mk);
+            copyfile('../../../../*.m', '.')
+            copyfile('../../../../dataRadoev1984.xlsx', '.')
+
         end
         
-        
-        %% parent folder
-        
-        mk = strcat('h0_',num2str(h0_init*10^9),'nm','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc), ...
-                    '_disjPr_',disjPress_switch,'100_25nm','_c1_',num2str(c1),'_c2_',num2str(c2));
-        mkdir(mk);
-        cd(mk);
-        copyfile('../../../../*.m', '.')
-        copyfile('../../../../dataRadoev1984.xlsx', '.')
+
         
          %% plot the first film length
         hfig = figure;
         hfig.Renderer = 'Painters';
+        figureName = strcat('initialProfile_h0_', num2str(h0_init*1e9), 'nm');
         [h x] = initialProfile(kappa,L_flat(1),L_curv,transitionLength,deltaX(1),filmConfiguration);
         area(x*l_scale*10^6,h*h0_init*10^9)
+        xlabel('$R_{film}$ ($\mu$m)','Fontsize',14)
+        ylabel('$h$ (nm)','Fontsize',14)
+        set(gca,'FontSize',14)
         ylim([0 800])
         
         set(hfig,'Units','Inches');
         pos = get(hfig,'Position');
         set(hfig,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)]);
-        print(hfig,'initialProfile','-dpdf','-r300');
+        print(hfig,figureName,'-dpdf','-r300');
         
         %% start simulations for different radii of films
 
@@ -352,7 +385,7 @@ switch filmConfiguration
             cd(run_mainFiles{i});
             [t_rupt(i) drainageTime(i) drainageTime_right(i) drainageTime_right_rupt(i) ...
             avg_cr_thinningRate_fit(i) h_cr_final(:,i) h_cr_final_FullFilmavg(:,i)] = main_axisSymmetryFilm(filmConfiguration, disjPress_switch, ...
-                        R_f(i), h0_init, A_vw, c1, c2, gam, Rc, visc, L_flat(i), N_flat(i), deltaX(i), deltaT(i), transitionLength, h_drain_start,...
+                        R_f(i), h0_init, A_vw, c1, c2, c3, gam, Rc, visc, L_flat(i), N_flat(i), deltaX(i), deltaT(i), transitionLength, h_drain_start,...
                         h_drain_end, h_critical_start, h_critical_end, t_cr_dimensional, res_limit, ctimestep, Tmp, L_curv, endTime, seN(i),...
                         N_Reals, animationSkip(i), startRealization, hJoyeStart, hJoyeEnd, cutOff_thickness);
 

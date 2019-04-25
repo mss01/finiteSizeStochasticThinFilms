@@ -11,23 +11,23 @@ set(0, 'defaulttextInterpreter','latex');
 
 %% Select the film configuration that you want to simulate
 
-%%%% flat films with periodic boundary conditions %%%%%%
+%%%%% flat films with periodic boundary conditions %%%%%%
 % filmConfiguration = 'flatFilms_PBC';    
 
-%%%%  semi-infinite films with far field boundary conditions %%%%%%
+%%%%%  semi-infinite films with far field boundary conditions %%%%%%
 % filmConfiguration = 'semiInfiniteNonFlatFilms';
 
 %%%%% finite sized films with curvature on both sides  %%%%%%
 % filmConfiguration = 'finiteSizedNonFlatFilms2D';
 
-%%%%% axis-symmetric case
+%%%%% axis-symmetric case  %%%%%%
 filmConfiguration = 'axisSymmetricFilm';
 
 %% Do we switch off the disjoining pressure in the solver?
 
 disjPress_switch = 'on';
-repulsion_switch = 'on';
-adhocRepulsion_switch = 'on';
+repulsion_switch = 'off';
+adhocRepulsion_switch = 'off';
 
 %% Based on the choice a part of this code gets executed
 
@@ -91,8 +91,8 @@ switch filmConfiguration
         mkdir(filmConfiguration)
         cd(filmConfiguration)
         %% raw conditions from the paper
-        R_film = [20 25 30 35 40 50 60 65 70 75 80 85 90 100 115 150 200 300 400 500 600 700 800 900 1000];   % radius of the film
-%         R_film = [30];
+%         R_film = [20 25 30 35 40 50 60 65 70 75 80 85 90 100 115 150 200 300 400 500 600 700 800 900 1000];   % radius of the film
+        R_film = [90];
         R_f = R_film.*10^-6;              % in m
         h0_init = 800e-9;                % initial film height in m
         A_vw = 1.5e-20;                   % Hamaker constant
@@ -221,10 +221,12 @@ switch filmConfiguration
     case 'axisSymmetricFilm'
         mkdir(filmConfiguration)
         cd(filmConfiguration)
-%         R_film = [20 25 30 35 40 50 60 65 70 75 80 85 90 100 115 150 200 300 400 500 600 700 800 900 1000];   % radius of the film
-        R_film = [50 500];
+        R_film = [75 80 85 90 100 115 150 200 300 400 500 600 700 800 900 1000];   % radius of the film
+%         R_film = [200 300 400 500 600 700 800 900 1000];
+%         R_film = [15];
+
         R_f = R_film.*10^-6;              % in m
-        h0_init = 300e-9;                 % initial film height in m
+        h0_init = 2000e-9;                 % initial film height in m
         A_vw = 1.5e-20;                   % Hamaker constant
         gam = 0.0445;                      % surface tension
         Rc = 1.8e-3;                      % radius of capillary
@@ -247,14 +249,16 @@ switch filmConfiguration
         hJoyeEnd = 0.627*kappa^(-2/7);                  % where to end
         h_critical_start = 0.627*kappa^(-2/7)*1.2;      % this is when the film thinning velocity starts becoming nearly constant
         h_critical_end = 0.627*kappa^(-2/7)*0.8;        % this is when the film thinning velocity ends becoming nearly constant
+%         h_critical_start = 0.627*kappa^(-2/7)*1.5;      % this is when the film thinning velocity starts becoming nearly constant
+%         h_critical_end = 0.627*kappa^(-2/7)*1.2;        % this is when the film thinning velocity ends becoming nearly constant
         
         %% domain size and discretization parameters
 
         deltaX = 0.05*ones(size(R_f));             % grid size (tested for grid independent results
         L_flat = round(R_f./l_scale,2);            % length of the flat film 
         N_flat = round(L_flat./deltaX);            % number of grid points in the same
-        ctimestep = 2.75;                          % exponent used in deciding deltaT = deltaX^c --> although c = 2.75 suffices, but a higher temp resolution enables more time stamps
-        seN = 20;                                  % save every seN time steps
+        ctimestep = 2.5;                          % exponent used in deciding deltaT = deltaX^c --> although c = 2.75 suffices, but a higher temp resolution enables more time stamps
+        seN = 100;                                  % save every seN time steps
 
         for i = 1:length(N_flat)
             if (N_flat(i)) < 40
@@ -262,7 +266,6 @@ switch filmConfiguration
                 deltaX(i) = L_flat(i)/N_flat(i);
             end        
         end
-        deltaT = deltaX.^ctimestep;
 
         %% simulation parameters
         
@@ -271,18 +274,26 @@ switch filmConfiguration
         lowerLimitOnL_curv = sqrt(h0_init*Rc)./l_scale;
         transitionLength = lowerLimitOnL_curv;
         L_curv = 10*lowerLimitOnL_curv;                       % length of the curved portion of the film, for kappa > 1, one needs a smaller value of of L_curv
-        endTime = 1000;
+        endTime = 2000;
         
         N_Reals = 1;                        % number of realizations
         for i = 1:length(R_film)
             if R_film(i) < 50
+                ctimestep(i) = 2.0;
                 seN(i) = 50;                            % save every these many time steps
                 animationSkip(i) = 100;                 % save animation every these many time steps
+            elseif R_film(i) >= 50 && R_film(i) <= 100
+                ctimestep(i) = 2.25;
+                seN(i) = 20;                            % save every these many time steps
+                animationSkip(i) = 100;                  % save animation every these many time steps        
             else
+                ctimestep(i) = 2.25;
                 seN(i) = 20;                            % save every these many time steps
                 animationSkip(i) = 100;                  % save animation every these many time steps
             end
         end
+        deltaT = deltaX.^ctimestep;
+
         startRealization = 1;               % first realization
 
 %         for i = 1:length(L_flat)
@@ -297,38 +308,43 @@ switch filmConfiguration
             mkdir('disjPress_on')
             cd('disjPress_on')
             if isequal(repulsion_switch,'on')
-                mkdir('repulsion_on')
-                cd('repulsion_on')
+%                 mkdir('repulsion_on')
+%                 cd('repulsion_on')
                 if isequal(adhocRepulsion_switch, 'on')
-                    mkdir('adhocRepulsion')
-                    cd('adhocRepulsion')
+                    mkdir('repulsion_adhoc_on')
+                    cd('repulsion_adhoc_on')
                     c1 = 0;
                     c2 = 0;
-                    c3 = 5e-9/h0_init;  
+                    c3 = 5*10^-9/h0_init;  
+                    cutOff_thickness = h_drain_end;
+                    eq_thickness_EDL_vdW = 0.0;
+                    
                     %% parent folder
         
-                    mk = strcat('h0_',num2str(h0_init*10^9),'nm','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc), ...
-                                '_disjPr_',disjPress_switch,'100_25nm','_c1_',num2str(c1),'_c2_',num2str(c2),'_hmin_',num2str(c3*h0_init*1e9)','nm');
+                    mk = strcat('RCoarse_dt_h0_',num2str(h0_init*10^9),'nm','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc), ...
+                                '_100_25nm','_c1_',num2str(c1),'_c2_',num2str(c2),'_hmin_',num2str(c3*h0_init*10^9),'nm');
                     mkdir(mk);
                     cd(mk);
-                    copyfile('../../../../../*.m', '.')
-                    copyfile('../../../../../dataRadoev1984.xlsx', '.')
+                    copyfile('../../../../*.m', '.')
+                    copyfile('../../../../dataRadoev1984.xlsx', '.')
                 elseif isequal(adhocRepulsion_switch, 'off')
-                    mkdir('electroRepulsion')
-                    cd('electroRepulsion')
-                    c1 = 2;
-                    c2 = 3;
+                    mkdir('repulsion_edl_on')
+                    cd('repulsion_edl_on')
+                    c1 = 80;
+                    c2 = 50;
     %                 c1 = 494.44;
     %                 c2 = 6e6;
                     c3 = 0;
+                    eq_thickness_EDL_vdW = 0.065;           % you can take this value from the disj pressure isotherm.. I should rather call a function that calculates this for different choices of A_vdW, c1 and c2.
+                    cutOff_thickness = h_drain_end;
                     %% parent folder
         
-                    mk = strcat('h0_',num2str(h0_init*10^9),'nm','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc), ...
-                                '_disjPr_',disjPress_switch,'100_25nm','_c1_',num2str(c1),'_c2_',num2str(c2));
+                    mk = strcat('RCoarse_dt_h0_',num2str(h0_init*10^9),'nm','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc), ...
+                                '_100_25nm','_c1_',num2str(c1),'_c2_',num2str(c2));
                     mkdir(mk);
                     cd(mk);
-                    copyfile('../../../../../*.m', '.')
-                    copyfile('../../../../../dataRadoev1984.xlsx', '.')
+                    copyfile('../../../../*.m', '.')
+                    copyfile('../../../../dataRadoev1984.xlsx', '.')
                 end
             elseif isequal(repulsion_switch,'off')
                 mkdir('repulsion_off')
@@ -336,9 +352,16 @@ switch filmConfiguration
                 c1 = 0;
                 c2 = 0;
                 c3 = 0;
+                eq_thickness_EDL_vdW = 0;
+                mk = strcat('Coarse_dt_h0_',num2str(h0_init*10^9),'nm','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc), ...
+                                '_100_25nm','_c1_',num2str(c1),'_c2_',num2str(c2));
+                mkdir(mk);
+                cd(mk);
+                copyfile('../../../../*.m', '.')
+                copyfile('../../../../dataRadoev1984.xlsx', '.')
             end         
         elseif isequal(disjPress_switch, 'off') 
-            cutOff_thickness = 0.01;             % since the thinning rate in the absence of disj pres decreases asymptotically, a higher cut-off would save computational time
+            cutOff_thickness = h_drain_end;             % since the thinning rate in the absence of disj pres decreases asymptotically, a higher cut-off would save computational time
             mkdir('disjPress_off')
             cd('disjPress_off')
             mkdir('repulsion_off')
@@ -346,17 +369,16 @@ switch filmConfiguration
             c1 = 0;
             c2 = 0;
             c3 = 0;
-            mk = strcat('h0_',num2str(h0_init*10^9),'nm','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc), ...
-                        '_disjPr_',disjPress_switch,'100_25nm','_c1_',num2str(c1),'_c2_',num2str(c2));
+            eq_thickness_EDL_vdW = 0;
+            mk = strcat('Coarse_dt_h0_2.25',num2str(h0_init*10^9),'nm','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc), ...
+                        '_100_25nm','_c1_',num2str(c1),'_c2_',num2str(c2));
             mkdir(mk);
             cd(mk);
             copyfile('../../../../*.m', '.')
             copyfile('../../../../dataRadoev1984.xlsx', '.')
 
         end
-        
-
-        
+     
          %% plot the first film length
         hfig = figure;
         hfig.Renderer = 'Painters';
@@ -386,15 +408,15 @@ switch filmConfiguration
             [t_rupt(i) drainageTime(i) drainageTime_right(i) drainageTime_right_rupt(i) ...
             avg_cr_thinningRate_fit(i) h_cr_final(:,i) h_cr_final_FullFilmavg(:,i)] = main_axisSymmetryFilm(filmConfiguration, disjPress_switch, ...
                         R_f(i), h0_init, A_vw, c1, c2, c3, gam, Rc, visc, L_flat(i), N_flat(i), deltaX(i), deltaT(i), transitionLength, h_drain_start,...
-                        h_drain_end, h_critical_start, h_critical_end, t_cr_dimensional, res_limit, ctimestep, Tmp, L_curv, endTime, seN(i),...
-                        N_Reals, animationSkip(i), startRealization, hJoyeStart, hJoyeEnd, cutOff_thickness);
+                        h_drain_end, h_critical_start, h_critical_end, t_cr_dimensional, res_limit, ctimestep(i), Tmp, L_curv, endTime, seN(i),...
+                        N_Reals, animationSkip(i), startRealization, hJoyeStart, hJoyeEnd, cutOff_thickness, eq_thickness_EDL_vdW);
 
             
             cd ..
             fileToBeSaved = strcat('workspace_','Rf_',num2str(min(R_film)),'_to_',num2str(max(R_film)),'.mat');
             save(fileToBeSaved)
         end
-        save('results_differentFilmSize.mat')
+        save('results_differentFilmSize_diffThinnRates.mat')
         
         %% post process finite sized films
         
@@ -404,7 +426,7 @@ end
 
 save('workspaceInputParameters.mat')
 
-cd ../../../..
+% cd ../../../../
 
 toc
 

@@ -1,7 +1,7 @@
 function [t_rupt drainageTime drainageTime_right drainageTime_right_rupt ...
     avg_cr_thinningRate_fit h_cr_final h_cr_final_FullFilmavg] = main_axisSymmetryFilm(filmConfiguration, disjPress_switch, R_f, h0_init, A_vw, c1, c2, c3, gam, Rc, visc, L_flat, N_flat, deltaX, deltaT, transitionLength, h_drain_start, h_drain_end, h_critical_start,...
                 h_critical_end, t_cr_dimensional, res_limit, ctimestep, Tmp, L_curv, endTime, seN, N_Reals, animationSkip, ...
-                startRealization, hJoyeStart, hJoyeEnd, cutOff_thickness)
+                startRealization, hJoyeStart, hJoyeEnd, cutOff_thickness, eq_thickness_EDL_vdW)
 
 
 
@@ -67,7 +67,9 @@ for m = 1:N_Reals
     A(h_adjusted^2) = 0.5*(x(h_adjusted) + x(h_adjusted - 1))/x(h_adjusted - 1);
     %% call the solver
 
-    [t_rupt(m) x_rupt(m) minH(:,m)] = filmSolver(filmConfiguration, disjPress_switch, repulsion_coeff, repulsion_expon, vdW_repulsion, L_flat,transitionLength,L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN, cutOff_thickness);
+    [t_rupt(m) x_rupt(m) minH(:,m)] = filmSolver(filmConfiguration, disjPress_switch, repulsion_coeff, repulsion_expon, vdW_repulsion, L_flat,...
+                                                    transitionLength,L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN, res_limit,...
+                                                    cutOff_thickness, eq_thickness_EDL_vdW);
 
     reali_series(m) = m;
     realization = realization + 1;

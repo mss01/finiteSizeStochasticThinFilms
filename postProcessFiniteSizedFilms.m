@@ -1,6 +1,4 @@
 function postProcessFiniteSizedFilms()
-clear all
-clc
 close all
 
 h_dimensionless = [0.05:0.05:1]';  % dimensionless film thickness vector --> will be used in the calculation of theoretical velocities
@@ -15,6 +13,7 @@ t_rupt_det = t_rupt.*t_scale;
 t_drain_det_wholeFilm = drainageTime.*t_scale;
 % t_drain_det_left = drainageTime_left.*t_scale;
 t_drain_det_right = drainageTime_right.*t_scale;
+drainageTime_Final = [t_drain_det_wholeFilm(1:2) t_drain_det_right(3:end)];
 v_thin_min_det = abs(avg_cr_thinningRate_fit).*h0_init*10^10./t_scale;
 h_cr_det_final = h_cr_final.*h0_init*10^10;
 
@@ -55,7 +54,7 @@ errorbar(R_manev, t_drain_2ndData, std_t_drain_2ndData, 'd')
 set(gca, 'XScale','log')
 set(gca, 'YScale','log')
 hold on
-loglog(R_film, t_drain_det_right, 'o')
+loglog(R_film, drainageTime_Final, 'o')
 xlabel('$R_{film}$ ($\mu$m)','Fontsize',14)
 ylabel('$t_{drain}$ (s)','Fontsize',14)
 hold on 
@@ -91,7 +90,7 @@ ylabel('$V$ ($\AA/s$)','Fontsize',14)
 set(gca,'FontSize',16)
 ylim([0.1*min(v_thin_min_det) 10*max(v_thin_min_det)])
 xlim([10 1100])
-legend('thinning rate, $\theta = 0$', 'Radoev thin rate', 'Reynolds thinning rate', 'MTR thinning rate')
+legend('thinning rate02, $\theta = 0$', 'Radoev thin rate', 'Reynolds thinning rate', 'MTR thinning rate')
 
 set(h2b,'Units','Inches');
 pos = get(h2b,'Position');

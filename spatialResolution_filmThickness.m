@@ -4,7 +4,7 @@ function [h_right_avg_j x_dimple_loc_right h_right x_right] = spatialResolution_
 %% calculate region around the right dimple
 %     x = x';
     x_ri = x(x>0);
-    for i = 1:length(t)-1;
+    for i = 1:length(t);
         h_r = c(:,i);
         h_ri(:,i) = h_r(x>0);
         [val_rightMin(i) idx_rightMin(i)] = min(h_ri(:,i));

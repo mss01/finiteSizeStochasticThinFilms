@@ -1,8 +1,8 @@
-function [t_rupt x_rupt minH] = filmSolver(filmConfiguration, disjPress_switch, repulsion_coeff, repulsion_expon, vdW_repulsion, L_flat,transitionLength,L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN, cutOff_thickness);
+function [t_rupt x_rupt minH] = filmSolver(filmConfiguration, disjPress_switch, repulsion_coeff, repulsion_expon, vdW_repulsion, L_flat,transitionLength,...
+                                                L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN, res_limit, cutOff_thickness, eq_thickness_EDL_vdW);
 
 
 tic
-
 %% equation
 %                                                           ___
 %  d H      d  /   3 d^3 H     1 dH   \      __    d  /    /           \
@@ -157,7 +157,7 @@ for i = 1:length(t_range)      % time marching
                                             - p1./x(k(3:h_adjusted-2)).*(h1_r.*repulsion_coeff.*exp(-repulsion_expon.*h(k(4:h_adjusted-1))) ...
                                                                         -  (h1_r + h1_l).*repulsion_coeff.*exp(-repulsion_expon.*h(k(3:h_adjusted-2))) ...
                                                                         +   h1_l.*repulsion_coeff.*exp(-repulsion_expon.*h(k(2:h_adjusted-3)))) ...
-                                            - p1./(12*kappa.*x(k(3:h_adjusted-2))).*((h1_r./h(k(4:h_adjusted-1)).^4) - (h1_r + h1_l)./h(k(3:h_adjusted-2)).^4 ...
+                                            - vdW_repulsion.*p1./(12*kappa.*x(k(3:h_adjusted-2))).*((h1_r./h(k(4:h_adjusted-1)).^4) - (h1_r + h1_l)./h(k(3:h_adjusted-2)).^4 ...
                                             + h1_l./h(k(2:h_adjusted-3)).^4); ...
                                             1+(x(end-1)^2 - L_flat^2)./4 + L_flat^2/2*log(L_flat/x(end-1)); ...
                                             deltaX^2];
@@ -176,6 +176,7 @@ for i = 1:length(t_range)      % time marching
 %     end
     flag = flag + 1;
     if(flag==seN)
+%         h_minimum = min(h)
         h_store(:,saver) = h;
         t_store(saver) = t;
 %         minH_cutOff(:,saver) = min(h(:));
@@ -191,14 +192,28 @@ for i = 1:length(t_range)      % time marching
         
 
     end
-    if min(h(:)) <= cutOff_thickness
-%         dlmwrite(sprintf('Data_%1.15f.txt',t),h,'precision','%.16f','delimiter','\t')      % write the last file because it becomes important especially for high kappa values in the late regime
-        h_store(:,saver) = h;
-        t_store(saver) = t;
-        break              % if the film height goes below a certain height stop the realization
-    else
-        continue
+    
+    switch filmConfiguration
+        case 'axisSymmetricFilm'
+            [h_right_avg_j(i) x_dimple_loc_right(i) h_right(i) x_right(i)] = spatialResolution_filmThickness(x,h,t,res_limit, deltaX);
+            h_avg(i) =  mean(h(1:length(L_flat)));
+            if h_avg(i) <= cutOff_thickness || h_right_avg_j(i) <= cutOff_thickness || min(h(:)) <= 1.05*vdW_repulsion || min(h(:)) <= 1.01*eq_thickness_EDL_vdW
+                h_store(:,saver) = h;
+                t_store(saver) = t;
+                break              % if the film height goes below a certain height stop the realization
+            else
+                continue
+            end
+
     end
+%     if min(h(:)) <= cutOff_thickness
+% %         dlmwrite(sprintf('Data_%1.15f.txt',t),h,'precision','%.16f','delimiter','\t')      % write the last file because it becomes important especially for high kappa values in the late regime
+%         h_store(:,saver) = h;
+%         t_store(saver) = t;
+%         break              % if the film height goes below a certain height stop the realization
+%     else
+%         continue
+%     end
     
 %  some check to ensure if any realization has given singular matrix, Matlab gives this warning away anyway, so have commented it for now.       
 %     if(rcond(full(A)) < 1e-12)

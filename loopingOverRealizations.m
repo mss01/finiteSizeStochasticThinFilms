@@ -106,7 +106,7 @@ end
 hfig1 = figure;
 plot(t(2:end), h_avg);
 hold on
-plot(t(2:end), h_right_avg_j)
+plot(t, h_right_avg_j)
 yli1 = yline(h_drain_start,'-.k','h(t_d = 0)','LineWidth',1.5);
 yli.LabelHorizontalAlignment = 'center';
 yli2 = yline(h_drain_end,':k','h(t_d)','LineWidth',1.5);
@@ -119,7 +119,7 @@ set(gca,'FontSize',14)
 set(hfig1,'Units','Inches');
 pos = get(hfig1,'Position');
 set(hfig1,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
-print(hfig1,'fullAndProbeaverageThicknessVsTime','-dpdf','-r300')
+print(hfig1,'avgThicknessVsT','-dpdf','-r300')
 
 % clear c
 clear dhmindt

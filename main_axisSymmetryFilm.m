@@ -18,7 +18,7 @@ vdW_repulsion = c3;
 
 %% simulation set-up
 
-[h x] = initialProfile(kappa,L_flat,L_curv,transitionLength,deltaX, filmConfiguration);  
+[h x] = initialProfile(kappa,L_flat,L_curv, R_f, Rc, transitionLength,deltaX, filmConfiguration);  
 L = L_curv + L_flat;   % total length of the film (curved+flat)
 N = length(x) - 1;   %  -1 (to keep the notion consistent with N being the number of intervals and not the number of grid points);  
 gx = gx_generator(N,L,x);  % generates a matrix that is going to be used when we finally implement noise
@@ -67,7 +67,7 @@ for m = 1:N_Reals
     A(h_adjusted^2) = 0.5*(x(h_adjusted) + x(h_adjusted - 1))/x(h_adjusted - 1);
     %% call the solver
 
-    [t_rupt(m) x_rupt(m) minH(:,m)] = filmSolver(filmConfiguration, disjPress_switch, repulsion_coeff, repulsion_expon, vdW_repulsion, L_flat,...
+    [t_rupt(m) x_rupt(m) minH(:,m)] = filmSolver(filmConfiguration, disjPress_switch, repulsion_coeff, repulsion_expon, vdW_repulsion, L_flat, R_f, Rc,...
                                                     transitionLength,L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN, res_limit,...
                                                     cutOff_thickness, eq_thickness_EDL_vdW);
 

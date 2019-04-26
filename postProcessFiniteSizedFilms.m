@@ -63,7 +63,7 @@ hold on
 loglog(R_film, t_MTR,'o')
 set(gca,'FontSize',16)
 ylim([0.1*min(t_drain_det_right) 10*max(t_drain_det_right)])
-xlim([10 1100])
+xlim([10 1400])
 legend('Manev - DS1', 'Manev - DS2','$\theta$ = 0','Reynolds theory','MTR theory','Location','best')
 
 set(h1b,'Units','Inches');
@@ -89,7 +89,7 @@ xlabel('$R_{film}$ ($\mu$m)','Fontsize',14)
 ylabel('$V$ ($\AA/s$)','Fontsize',14)
 set(gca,'FontSize',16)
 ylim([0.1*min(v_thin_min_det) 10*max(v_thin_min_det)])
-xlim([10 1100])
+xlim([10 1400])
 legend('thinning rate02, $\theta = 0$', 'Radoev thin rate', 'Reynolds thinning rate', 'MTR thinning rate')
 
 set(h2b,'Units','Inches');
@@ -110,7 +110,7 @@ plot(R_film, v_re_det(2,:),'o')
 hold on
 plot(R_film, v_MTR(:,2),'o')
 ylim([0.1*min(v_thin_min_det) 10*max(v_thin_min_det)])
-xlim([10 1100])
+xlim([10 1400])
 xlabel('$R_{film}$ ($\mu$m)','Fontsize',14)
 ylabel('$V$ ($\AA/s$)','Fontsize',14)
 set(gca,'FontSize',14)

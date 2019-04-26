@@ -221,12 +221,12 @@ switch filmConfiguration
     case 'axisSymmetricFilm'
         mkdir(filmConfiguration)
         cd(filmConfiguration)
-        R_film = [75 80 85 90 100 115 150 200 300 400 500 600 700 800 900 1000];   % radius of the film
+        R_film = [25 30 35 40 50 60 65 70 75 80 85 90 100 115 150 200 300 400 500 600 700 800 900 1000 1100 1200 1300];   % radius of the film
 %         R_film = [200 300 400 500 600 700 800 900 1000];
 %         R_film = [15];
 
         R_f = R_film.*10^-6;              % in m
-        h0_init = 2000e-9;                 % initial film height in m
+        h0_init = 500e-9;                 % initial film height in m
         A_vw = 1.5e-20;                   % Hamaker constant
         gam = 0.0445;                      % surface tension
         Rc = 1.8e-3;                      % radius of capillary
@@ -243,8 +243,8 @@ switch filmConfiguration
         %% drainage time start and end, critical thinning rates start and end, Joye's thinning rate start and end
 
         res_limit = res_limit_dimensional/l_scale;      % spatial resolution (scaled)
-        h_drain_start = 100e-9/h0_init;                 % 100nm as mentioned in Wasan & Malhotra (1987)
-        h_drain_end = 25e-9/h0_init;                    % 25 nm as mentioned in Wasan & Malhotra (1987)
+        h_drain_start = 200e-9/h0_init;                 % 100nm as mentioned in Wasan & Malhotra (1987)
+        h_drain_end = 50e-9/h0_init;                    % 25 nm as mentioned in Wasan & Malhotra (1987)
         hJoyeStart = 0.8;                               % determine when to start measuring thinning rates
         hJoyeEnd = 0.627*kappa^(-2/7);                  % where to end
         h_critical_start = 0.627*kappa^(-2/7)*1.2;      % this is when the film thinning velocity starts becoming nearly constant
@@ -283,11 +283,11 @@ switch filmConfiguration
                 seN(i) = 50;                            % save every these many time steps
                 animationSkip(i) = 100;                 % save animation every these many time steps
             elseif R_film(i) >= 50 && R_film(i) <= 100
-                ctimestep(i) = 2.25;
+                ctimestep(i) = 2.0;
                 seN(i) = 20;                            % save every these many time steps
                 animationSkip(i) = 100;                  % save animation every these many time steps        
             else
-                ctimestep(i) = 2.25;
+                ctimestep(i) = 2.0;
                 seN(i) = 20;                            % save every these many time steps
                 animationSkip(i) = 100;                  % save animation every these many time steps
             end
@@ -321,7 +321,7 @@ switch filmConfiguration
                     
                     %% parent folder
         
-                    mk = strcat('RCoarse_dt_h0_',num2str(h0_init*10^9),'nm','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc), ...
+                    mk = strcat('adj_CP_h0_',num2str(h0_init*10^9),'nm','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc), ...
                                 '_100_25nm','_c1_',num2str(c1),'_c2_',num2str(c2),'_hmin_',num2str(c3*h0_init*10^9),'nm');
                     mkdir(mk);
                     cd(mk);
@@ -339,7 +339,7 @@ switch filmConfiguration
                     cutOff_thickness = h_drain_end;
                     %% parent folder
         
-                    mk = strcat('RCoarse_dt_h0_',num2str(h0_init*10^9),'nm','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc), ...
+                    mk = strcat('adj_CP_h0_',num2str(h0_init*10^9),'nm','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc), ...
                                 '_100_25nm','_c1_',num2str(c1),'_c2_',num2str(c2));
                     mkdir(mk);
                     cd(mk);
@@ -353,8 +353,8 @@ switch filmConfiguration
                 c2 = 0;
                 c3 = 0;
                 eq_thickness_EDL_vdW = 0;
-                mk = strcat('Coarse_dt_h0_',num2str(h0_init*10^9),'nm','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc), ...
-                                '_100_25nm','_c1_',num2str(c1),'_c2_',num2str(c2));
+                mk = strcat('adj_CP_h0_',num2str(h0_init*10^9),'nm','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc), ...
+                                '_200_50nm','_c1_',num2str(c1),'_c2_',num2str(c2));
                 mkdir(mk);
                 cd(mk);
                 copyfile('../../../../*.m', '.')
@@ -370,7 +370,7 @@ switch filmConfiguration
             c2 = 0;
             c3 = 0;
             eq_thickness_EDL_vdW = 0;
-            mk = strcat('Coarse_dt_h0_2.25',num2str(h0_init*10^9),'nm','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc), ...
+            mk = strcat('adj_CP_h0',num2str(h0_init*10^9),'nm','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc), ...
                         '_100_25nm','_c1_',num2str(c1),'_c2_',num2str(c2));
             mkdir(mk);
             cd(mk);
@@ -383,12 +383,12 @@ switch filmConfiguration
         hfig = figure;
         hfig.Renderer = 'Painters';
         figureName = strcat('initialProfile_h0_', num2str(h0_init*1e9), 'nm');
-        [h x] = initialProfile(kappa,L_flat(1),L_curv,transitionLength,deltaX(1),filmConfiguration);
+        [h x] = initialProfile(kappa,L_flat(1),L_curv, R_f(1), Rc, transitionLength,deltaX(1),filmConfiguration);
         area(x*l_scale*10^6,h*h0_init*10^9)
         xlabel('$R_{film}$ ($\mu$m)','Fontsize',14)
         ylabel('$h$ (nm)','Fontsize',14)
         set(gca,'FontSize',14)
-        ylim([0 800])
+        ylim([0 2*h0_init*10^9])
         
         set(hfig,'Units','Inches');
         pos = get(hfig,'Position');

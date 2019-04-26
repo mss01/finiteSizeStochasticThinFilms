@@ -1,7 +1,7 @@
-function makeAnimation_det(filmConfiguration, animationSkip,kappa, L_flat, L_curv, transitionLength,deltaX, ...
+function makeAnimation_det(filmConfiguration, animationSkip,kappa, L_flat, L_curv, R_f, Rc, transitionLength,deltaX, ...
                             h_store, t_store, h0_init, t_scale, l_scale, beginDrainageTime_right, endDrainageTime_right, x_dimple_loc_right, res_limit, h_drain_start, h_drain_end)
 
-[h x] = initialProfile(kappa,L_flat,L_curv,transitionLength,deltaX, filmConfiguration);
+[h x] = initialProfile(kappa,L_flat,L_curv, R_f, Rc, transitionLength,deltaX, filmConfiguration);
 h_all = [h h_store];
 t = [0 t_store]*t_scale;                    % corresponds to each time step, including the initial time step                    
 formatSpec = 't = %0.2f,';          % to show time steps

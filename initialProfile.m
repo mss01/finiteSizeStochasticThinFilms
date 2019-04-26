@@ -1,4 +1,4 @@
-function [h x] = initialProfile(kappa,L_flat,L_curv,transitionLength,deltaX, filmConfiguration)
+function [h x] = initialProfile(kappa,L_flat,L_curv, R_f, Rc,transitionLength,deltaX, filmConfiguration)
 
 
 switch filmConfiguration
@@ -50,7 +50,7 @@ switch filmConfiguration
         end
         x = [FlatPortion CurvedPortion];
         hFlat = ones(size(FlatPortion));
-        hCurv = 1 + (CurvedPortion.^2 - L_flat.^2)./4 + L_flat^2/2.*log(L_flat./CurvedPortion);
+        hCurv = 1 + (CurvedPortion.^2 - L_flat.^2)./4.*1./(1 - R_f.^2./Rc.^2) + L_flat^2/2.*log(L_flat./CurvedPortion).*1./(1 - R_f.^2./Rc.^2);
         h = [hFlat hCurv];
       
 end

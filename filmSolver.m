@@ -1,4 +1,4 @@
-function [t_rupt x_rupt minH] = filmSolver(filmConfiguration, disjPress_switch, repulsion_coeff, repulsion_expon, vdW_repulsion, L_flat,transitionLength,...
+function [t_rupt x_rupt minH] = filmSolver(filmConfiguration, disjPress_switch, repulsion_coeff, repulsion_expon, vdW_repulsion, L_flat,R_f, Rc, transitionLength,...
                                                 L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN, res_limit, cutOff_thickness, eq_thickness_EDL_vdW);
 
 
@@ -46,7 +46,7 @@ tic
 
 %%%%%----------- Recall the initial conditions ------------%%%%%
 
-[h x] = initialProfile(kappa, L_flat,L_curv,transitionLength,deltaX, filmConfiguration);
+[h x] = initialProfile(kappa, L_flat,L_curv, R_f, Rc, transitionLength,deltaX, filmConfiguration);
 
 if isequal(disjPress_switch, 'on') 
     p1 = deltaT/(deltaX^2);            % parameter for the explicit part (disj press)
@@ -159,8 +159,8 @@ for i = 1:length(t_range)      % time marching
                                                                         +   h1_l.*repulsion_coeff.*exp(-repulsion_expon.*h(k(2:h_adjusted-3)))) ...
                                             - vdW_repulsion.*p1./(12*kappa.*x(k(3:h_adjusted-2))).*((h1_r./h(k(4:h_adjusted-1)).^4) - (h1_r + h1_l)./h(k(3:h_adjusted-2)).^4 ...
                                             + h1_l./h(k(2:h_adjusted-3)).^4); ...
-                                            1+(x(end-1)^2 - L_flat^2)./4 + L_flat^2/2*log(L_flat/x(end-1)); ...
-                                            deltaX^2];
+                                            1+(x(end-1)^2 - L_flat^2)./4.*1./(1 - R_f.^2./Rc.^2) + L_flat^2/2*log(L_flat/x(end-1)).*1./(1 - R_f.^2./Rc.^2); ...
+                                            deltaX^2.*1./(1 - R_f.^2./Rc.^2)];
     end
 
     h = A\b;
@@ -197,7 +197,7 @@ for i = 1:length(t_range)      % time marching
         case 'axisSymmetricFilm'
             [h_right_avg_j(i) x_dimple_loc_right(i) h_right(i) x_right(i)] = spatialResolution_filmThickness(x,h,t,res_limit, deltaX);
             h_avg(i) =  mean(h(1:length(L_flat)));
-            if h_avg(i) <= cutOff_thickness || h_right_avg_j(i) <= cutOff_thickness || min(h(:)) <= 1.05*vdW_repulsion || min(h(:)) <= 1.01*eq_thickness_EDL_vdW
+            if h_avg(i) <= cutOff_thickness || h_right_avg_j(i) <= cutOff_thickness || min(h(:)) <= 1.05*vdW_repulsion || min(h(:)) <= 1.01*eq_thickness_EDL_vdW || min(h(:)) <= cutOff_thickness
                 h_store(:,saver) = h;
                 t_store(saver) = t;
                 break              % if the film height goes below a certain height stop the realization

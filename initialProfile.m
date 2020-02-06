@@ -1,4 +1,4 @@
-function [h x] = initialProfile(kappa,L_flat,L_curv, R_f, Rc,transitionLength,deltaX, filmConfiguration)
+function [h x] = initialProfile(kappa,L_flat,L_curv, R_f, Rc,transitionLength,deltaX, filmConfiguration, correctionLP_switch)
 
 
 switch filmConfiguration
@@ -41,6 +41,57 @@ switch filmConfiguration
             h = [h_left 1 h_right];
         end
     case 'axisSymmetricFilm'
+%         cutOff_r = 3*deltaX;
+%         transitionLength = 1.4;
+%         FlatPortion = (cutOff_r - 2*deltaX):deltaX:L_flat - transitionLength;
+%         actualTransition = (L_flat - transitionLength + deltaX):deltaX:L_flat + transitionLength;
+%         if mod(L_flat, deltaX) ~= 0
+%             CurvedPortion = (L_flat + transitionLength        ):deltaX:(L_flat + L_curv + deltaX);
+%         else
+%             CurvedPortion = (L_flat + transitionLength + deltaX):deltaX:(L_flat + L_curv + deltaX);
+%         end
+%         x = [FlatPortion actualTransition CurvedPortion];
+%         hFlat = ones(size(FlatPortion));
+%         dLeft =  L_flat - transitionLength;
+%         dRight = L_flat + transitionLength;
+%         B = -dLeft*(dLeft/2 + 1/(2*transitionLength)*(dLeft^2/3 - (L_flat^2 - transitionLength^2)/2));
+%         A = B - dRight^3/(12*transitionLength);
+%         D = -(dLeft^2/4 + (dLeft^3/9 - dRight*dLeft^2/4)./(2.*transitionLength) ...
+%                 + B*log(dLeft));
+%         C = -5*dRight^3/(72*transitionLength) + (B-A)*log(dRight) + D;
+%         hTransition = 1 + actualTransition.^2./4 + (actualTransition.^3./9 - (dRight.*actualTransition.^2./4))./(2.*transitionLength) ...
+%             + B.*log(actualTransition) + D;
+%         switch correctionLP_switch
+%             case 'on' % not modified for the transition length for now
+%                 hCurv = 1 + (CurvedPortion.^2 - L_flat.^2)./4.*1./(1 - R_f.^2./Rc.^2) + L_flat^2/2.*log(L_flat./CurvedPortion).*1./(1 - R_f.^2./Rc.^2);
+%             case 'off'
+% %                 hCurv = 1 + (CurvedPortion.^2 - L_flat.^2)./4 + L_flat^2/2.*log(L_flat./CurvedPortion);
+%                 hCurv = 1 + CurvedPortion.^2./4 + A.*log(CurvedPortion) + C;
+%         end
+%         h = [hFlat hTransition hCurv];
+
+
+% 
+%         ampl = 2.5*10^-2;
+%         cutOff_r = 3*deltaX;
+%         FlatPortion = cutOff_r - 2*deltaX:deltaX:L_flat;
+%         if mod(L_flat, deltaX) ~= 0
+%             CurvedPortion = (L_flat         ):deltaX:(L_flat + L_curv + deltaX);
+%         else
+%             CurvedPortion = (L_flat + deltaX):deltaX:(L_flat + L_curv + deltaX);
+%         end
+%         x = [FlatPortion CurvedPortion];
+%         hFlat = ones(size(FlatPortion)) + ampl.*sin(6*pi.*FlatPortion/(L_flat));
+%         switch correctionLP_switch
+%             case 'on'
+%                 hCurv = 1 + (CurvedPortion.^2 - L_flat.^2)./4.*1./(1 - R_f.^2./Rc.^2) + L_flat^2/2.*log(L_flat./CurvedPortion).*1./(1 - R_f.^2./Rc.^2);
+%             case 'off'
+%                 hCurv = 1 + (CurvedPortion.^2 - L_flat.^2)./4 + L_flat^2/2.*log(L_flat./CurvedPortion);
+%         end
+%         h = [hFlat hCurv];
+
+
+        
         cutOff_r = 3*deltaX;
         FlatPortion = cutOff_r - 2*deltaX:deltaX:L_flat;
         if mod(L_flat, deltaX) ~= 0
@@ -49,8 +100,13 @@ switch filmConfiguration
             CurvedPortion = (L_flat + deltaX):deltaX:(L_flat + L_curv + deltaX);
         end
         x = [FlatPortion CurvedPortion];
-        hFlat = ones(size(FlatPortion));
-        hCurv = 1 + (CurvedPortion.^2 - L_flat.^2)./4.*1./(1 - R_f.^2./Rc.^2) + L_flat^2/2.*log(L_flat./CurvedPortion).*1./(1 - R_f.^2./Rc.^2);
+        hFlat = ones(size(FlatPortion))*1;
+        switch correctionLP_switch
+            case 'on'
+                hCurv = 1 + (CurvedPortion.^2 - L_flat.^2)./4.*1./(1 - R_f.^2./Rc.^2) + L_flat^2/2.*log(L_flat./CurvedPortion).*1./(1 - R_f.^2./Rc.^2);
+            case 'off'
+                hCurv = 1 + (CurvedPortion.^2 - L_flat.^2)./4 + L_flat^2/2.*log(L_flat./CurvedPortion);
+        end
         h = [hFlat hCurv];
       
 end

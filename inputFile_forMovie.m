@@ -248,10 +248,10 @@ switch filmConfiguration
 %                 R_film =  [40 50 60 65 70 75 80 85 90 100 115 150 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 2000 3000 4000];   % radius of the film
 %                 R_film = [900 1000 1100 1200 1300 1400 1500 2000 3000 4000];
 %                 R_film = [40 50 80 100 150 200 300 400 800 2000 4000];
-                R_film = [50];
+                R_film = [4000];
 
                 R_f = R_film.*10^-6;                            % in m
-                h0_init = 300e-9;                               % initial film height in m
+                h0_init = 2000e-9;                               % initial film height in m
                 A_vw = 1.5e-20;                                % Hamaker constant
                 gam = 0.0445;                                    % surface tension
                 Rc = 1.8e-3;                                    % radius of capillary
@@ -305,28 +305,30 @@ switch filmConfiguration
 
                 N_Reals = 1;                        % number of realizations
                 for i = 1:length(R_film)
-                    if R_film(i) < 50
-                        ctimestep(i) = 2.0;
-                        seN(i) = 50.0;                            % save every these many time steps
-                        animationSkip(i) = 10;                 % save animation every these many time steps
-                    elseif R_film(i) >= 50 && R_film(i) <= 100
-                        ctimestep(i) = 2.0;
-                        seN(i) = 2;                            % save every these many time steps
-                        animationSkip(i) = 10;                  % save animation every these many time steps      
-                    elseif R_film(i) >= 900
-                        ctimestep(i) = 2.0;
-                        seN(i) = 20;                            % save every these many time steps
-                        animationSkip(i) = 200; 
-                    elseif R_film(i) == 100000 || R_film(i) == 50000 
-                        ctimestep(i) = 2.0;
-                        seN(i) = 200;                            % save every these many time steps
-                        animationSkip(i) = 200; 
-                    else
-                        ctimestep(i) = 2.0;
-                        seN(i) = 20;                            % save every these many time steps
-                        animationSkip(i) = 200;                  % save animation every these many time steps
-                    end
-                    
+%                     if R_film(i) < 50
+%                         ctimestep(i) = 2.0;
+%                         seN(i) = 10.0;                            % save every these many time steps
+%                         animationSkip(i) = 10;                 % save animation every these many time steps
+%                     elseif R_film(i) >= 50 && R_film(i) <= 100
+%                         ctimestep(i) = 2.0;
+%                         seN(i) = 2;                            % save every these many time steps
+%                         animationSkip(i) = 10;                  % save animation every these many time steps      
+%                     elseif R_film(i) >= 900
+%                         ctimestep(i) = 2.0;
+%                         seN(i) = 20;                            % save every these many time steps
+%                         animationSkip(i) = 200; 
+%                     elseif R_film(i) == 100000 || R_film(i) == 50000 
+%                         ctimestep(i) = 2.0;
+%                         seN(i) = 200;                            % save every these many time steps
+%                         animationSkip(i) = 200; 
+%                     else
+%                         ctimestep(i) = 2.0;
+%                         seN(i) = 20;                            % save every these many time steps
+%                         animationSkip(i) = 200;                  % save animation every these many time steps
+%                     end
+                    ctimestep(i) = 2.0;
+                    seN(i) = 20.0;
+                    animationSkip(i) = 200;
                 end
                 deltaT = deltaX.^ctimestep;
 
@@ -390,7 +392,7 @@ switch filmConfiguration
                         c3 = 0;
                         eq_thickness_EDL_vdW = 0;
                         mk = strcat('Unadj_CP_h0_',num2str(h0_init*10^9),'nm','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc), ...
-                                        '_100_25nm','_c1_',num2str(c1),'_c2_',num2str(c2),'_Jan14th_IC1_finer');
+                                        '_100_25nm','_c1_',num2str(c1),'_c2_',num2str(c2),'_Jan23rd_movie');
                         mkdir(mk);
                         cd(mk);
                         copyfile('../../../../*.m', '.');
@@ -407,7 +409,7 @@ switch filmConfiguration
                     c3 = 0;
                     eq_thickness_EDL_vdW = 0;
                     mk = strcat('Unadj_CP_h0',num2str(h0_init*10^9),'nm','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc), ...
-                                '_100_25nm','_c1_',num2str(c1),'_c2_',num2str(c2),'_June13th_no_vdW');
+                                '_100_25nm','_c1_',num2str(c1),'_c2_',num2str(c2),'_Jan23rd_movie');
                     mkdir(mk);
                     cd(mk);
                     copyfile('../../../../*.m', '.')

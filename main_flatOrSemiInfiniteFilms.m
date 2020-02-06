@@ -1,5 +1,5 @@
 function main_flatOrSemiInfiniteFilms(filmConfiguration, disjPress_switch, kappa, L_flat, deltaX, deltaT, transitionLength, ctimestep, Tmp, L_curv,...
-                endTime, seN, N_Reals, startRealization, cutOff_thickness)
+                endTime, seN, N_Reals, startRealization, cutOff_thickness, R_f, Rc, correctionLP_switch, repulsion_coeff, repulsion_expon, vdW_repulsion, res_limit, eq_thickness_EDL_vdW)
 
 
 
@@ -7,7 +7,7 @@ function main_flatOrSemiInfiniteFilms(filmConfiguration, disjPress_switch, kappa
 
 %% simulation set-up
 
-[h x] = initialProfile(kappa,L_flat,L_curv,transitionLength,deltaX, filmConfiguration);  
+[h x] = initialProfile(kappa,L_flat,L_curv, R_f, Rc,transitionLength,deltaX, filmConfiguration, correctionLP_switch);  
 L = 2*(L_curv + L_flat);   % total length of the film (curved+flat)
 N = length(x) - 1;   %  -1 (to keep the notion consistent with N being the number of intervals and not the number of grid points);  
 gx = gx_generator(N,L,x);  % generates a matrix that is going to be used when we finally implement noise
@@ -96,8 +96,8 @@ for m = 1:N_Reals
     
     %% call the solver
 
-    [t_rupt(m) x_rupt(m) minH(:,m)] = filmSolver(filmConfiguration, disjPress_switch, L_flat,transitionLength,L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN, cutOff_thickness);
-
+    [t_rupt(m) x_rupt(m) minH(:,m)] = filmSolver(filmConfiguration, disjPress_switch, correctionLP_switch, repulsion_coeff, repulsion_expon, vdW_repulsion, L_flat,R_f, Rc, transitionLength,...
+                                                L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN, res_limit, cutOff_thickness, eq_thickness_EDL_vdW);
     reali_series(m) = m;
     realization = realization + 1;
     mk = strcat('realization',num2str(realization));  % name your realization folder

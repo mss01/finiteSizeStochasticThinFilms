@@ -1,7 +1,8 @@
 function [t_rupt drainageTime drainageTime_right drainageTime_right_rupt ...
     avg_cr_thinningRate_fit h_cr_final h_cr_final_FullFilmavg] = main_finiteSizedFilms(filmConfiguration, disjPress_switch, R_f, h0_init, A_vw, gam, Rc, visc, L_flat, N_flat, deltaX, deltaT, transitionLength, h_drain_start, h_drain_end, h_critical_start,...
                 h_critical_end, t_cr_dimensional, res_limit, ctimestep, Tmp, L_curv, endTime, seN, N_Reals, animationSkip, ...
-                startRealization, hJoyeStart, hJoyeEnd, cutOff_thickness)
+                startRealization, hJoyeStart, hJoyeEnd, cutOff_thickness, correctionLP_switch, repulsion_coeff, repulsion_expon, vdW_repulsion,...
+                eq_thickness_EDL_vdW)
 
 
 
@@ -13,7 +14,8 @@ t_cr = t_cr_dimensional./t_scale;
 
 %% simulation set-up
 
-[h x] = initialProfile(kappa,L_flat,L_curv,transitionLength,deltaX, filmConfiguration);  
+[h x] = initialProfile(kappa,L_flat,L_curv, R_f, Rc,transitionLength,deltaX, filmConfiguration, correctionLP_switch);  
+length(h)
 L = 2*(L_curv + L_flat);   % total length of the film (curved+flat)
 N = length(x) - 1;   %  -1 (to keep the notion consistent with N being the number of intervals and not the number of grid points);  
 gx = gx_generator(N,L,x);  % generates a matrix that is going to be used when we finally implement noise
@@ -65,7 +67,8 @@ for m = 1:N_Reals
     A(h_adjusted*(h_adjusted-1))=-2;
     %% call the solver
 
-    [t_rupt(m) x_rupt(m) minH(:,m)] = filmSolver(filmConfiguration, disjPress_switch, L_flat,transitionLength,L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN, cutOff_thickness);
+    [t_rupt(m) x_rupt(m) minH(:,m)] = filmSolver(filmConfiguration, disjPress_switch,correctionLP_switch, repulsion_coeff, repulsion_expon, vdW_repulsion,...
+                                    L_flat, R_f, Rc, transitionLength,L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN, res_limit, cutOff_thickness, eq_thickness_EDL_vdW);
 
     reali_series(m) = m;
     realization = realization + 1;
@@ -80,9 +83,9 @@ filename = ['data_', 'kappa_',num2str(kappa),'_Lf_',num2str(L),'_N_',num2str(N),
 
 
 [t_rupt drainageTime drainageTime_right drainageTime_right_rupt  ...
-    avg_cr_thinningRate_fit h_cr_final h_cr_final_FullFilmavg] = postProc_det(filmConfiguration, disjPress_switch,...
-    R_f, L_flat, L_curv, transitionLength, deltaX, deltaT, kappa, seN, animationSkip, h_drain_start, h_drain_end,...
-    h_critical_start, h_critical_end, t_cr, res_limit, hJoyeStart, hJoyeEnd, h0_init, Rc);
+    avg_cr_thinningRate_fit h_cr_final h_cr_final_FullFilmavg] = postProc_det(filmConfiguration, disjPress_switch, correctionLP_switch, R_f, L_flat, L_curv, transitionLength, ...
+    deltaX, deltaT, kappa, t_scale, l_scale, seN, animationSkip, h_drain_start, h_drain_end,...
+    h_critical_start, h_critical_end, t_cr, res_limit, hJoyeStart, hJoyeEnd, h0_init, Rc, gam);
 
 save(filename)
 

@@ -4,11 +4,11 @@ for i = 1:N+1;
     for k = 1:(N+1)                 
         m = k - (N/2 + 1);                            
         if m < 0
-            gx(k,i) = sqrt(2/L)*sin((2*pi*m*x(i))/L); % to account for negative indices
+            gx(k,i) = sqrt(2/L).*sin((2.*pi.*m.*x(i))./L); % to account for negative indices
         elseif m == 0
-            gx(k,i) = sqrt(1/L);                      % the zeroth index
+            gx(k,i) = sqrt(1./L);                      % the zeroth index
         else
-            gx(k,i) = sqrt(2/L)*cos((2*pi*m*x(i))/L); % the positive indices (symmetric to the negative ones)
+            gx(k,i) = sqrt(2/L).*cos((2.*pi.*m.*x(i))./L); % the positive indices (symmetric to the negative ones)
         end
     end
 end

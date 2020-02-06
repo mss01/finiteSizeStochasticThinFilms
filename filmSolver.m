@@ -1,4 +1,4 @@
-function [t_rupt x_rupt minH] = filmSolver(filmConfiguration, disjPress_switch, repulsion_coeff, repulsion_expon, vdW_repulsion, L_flat,R_f, Rc, transitionLength,...
+function [t_rupt x_rupt minH Press] = filmSolver(filmConfiguration, disjPress_switch, correctionLP_switch, repulsion_coeff, repulsion_expon, vdW_repulsion, L_flat,R_f, Rc, transitionLength,...
                                                 L_curv,N,deltaX,deltaT,kappa,Tmp,gx,h_adjusted,A,p,endTime,seN, res_limit, cutOff_thickness, eq_thickness_EDL_vdW);
 
 
@@ -46,7 +46,18 @@ tic
 
 %%%%%----------- Recall the initial conditions ------------%%%%%
 
-[h x] = initialProfile(kappa, L_flat,L_curv, R_f, Rc, transitionLength,deltaX, filmConfiguration);
+[h x] = initialProfile(kappa,L_flat,L_curv, R_f, Rc,transitionLength,deltaX, filmConfiguration, correctionLP_switch);
+length(h)
+switch filmConfiguration 
+    case 'finiteSizedNonFlatFilms2D'
+        for i = 2:(length(h)-1)/2 - 1
+            Pres(i) = -(h(i+1) - 2*h(i) + h(i-1))./deltaX^2 + 1/h(i)^3;
+        end    
+    case {'semiInfiniteNonFlatFilms', 'axisSymmetricFilm', 'flatFilms_PBC'}
+        for i = 2:length(h) - 1
+            Pres(i) = -(h(i+1) - 2*h(i) + h(i-1))/deltaX^2 + 1/h(i)^3;
+        end
+end
 
 if isequal(disjPress_switch, 'on') 
     p1 = deltaT/(deltaX^2);            % parameter for the explicit part (disj press)
@@ -150,8 +161,9 @@ for i = 1:length(t_range)      % time marching
                 b = [2*kappa*deltaX^2; kappa*(x(2)+L_flat)^2+1; h(3:h_adjusted-2)-p1*(h2_r - h2_l) + p3.*(sqrt(h1_r).*noi_r - sqrt(h1_l).*noi_l); kappa*(x(end-1)-L_flat)^2+1 ; 2*kappa*deltaX^2];
                 
         case 'axisSymmetricFilm'
-            
-                b = [0; 0; h(3:h_adjusted-2) ...
+            switch correctionLP_switch
+                case 'on'
+                    b = [0; 0; h(3:h_adjusted-2) ...
                             + p1./(12*kappa.*x(k(3:h_adjusted-2))).*((h1_r./h(k(4:h_adjusted-1)).^3) - (h1_r + h1_l)./h(k(3:h_adjusted-2)).^3 ...
                                             + h1_l./h(k(2:h_adjusted-3)).^3) ...
                                             - p1./x(k(3:h_adjusted-2)).*(h1_r.*repulsion_coeff.*exp(-repulsion_expon.*h(k(4:h_adjusted-1))) ...
@@ -161,6 +173,18 @@ for i = 1:length(t_range)      % time marching
                                             + h1_l./h(k(2:h_adjusted-3)).^4); ...
                                             1+(x(end-1)^2 - L_flat^2)./4.*1./(1 - R_f.^2./Rc.^2) + L_flat^2/2*log(L_flat/x(end-1)).*1./(1 - R_f.^2./Rc.^2); ...
                                             deltaX^2.*1./(1 - R_f.^2./Rc.^2)];
+                case 'off'
+                    b = [0; 0; h(3:h_adjusted-2) ...
+                            + p1./(12*kappa.*x(k(3:h_adjusted-2))).*((h1_r./h(k(4:h_adjusted-1)).^3) - (h1_r + h1_l)./h(k(3:h_adjusted-2)).^3 ...
+                                            + h1_l./h(k(2:h_adjusted-3)).^3) ...
+                                            - p1./x(k(3:h_adjusted-2)).*(h1_r.*repulsion_coeff.*exp(-repulsion_expon.*h(k(4:h_adjusted-1))) ...
+                                                                        -  (h1_r + h1_l).*repulsion_coeff.*exp(-repulsion_expon.*h(k(3:h_adjusted-2))) ...
+                                                                        +   h1_l.*repulsion_coeff.*exp(-repulsion_expon.*h(k(2:h_adjusted-3)))) ...
+                                            - vdW_repulsion.*p1./(12*kappa.*x(k(3:h_adjusted-2))).*((h1_r./h(k(4:h_adjusted-1)).^4) - (h1_r + h1_l)./h(k(3:h_adjusted-2)).^4 ...
+                                            + h1_l./h(k(2:h_adjusted-3)).^4); ...
+                                            1+(x(end-1)^2 - L_flat^2)./4.+ L_flat^2/2*log(L_flat/x(end-1)); ...
+                                            deltaX^2];
+            end
     end
 
     h = A\b;
@@ -179,6 +203,16 @@ for i = 1:length(t_range)      % time marching
 %         h_minimum = min(h)
         h_store(:,saver) = h;
         t_store(saver) = t;
+        switch filmConfiguration
+            case 'finiteSizedNonFlatFilms2D'
+                for i = 2:(length(h)-1)/2 - 1
+                    Pressure(i,saver) = -(h(i+1) - 2*h(i) + h(i-1))/deltaX^2 + 1/h(i)^3;
+                end
+            case 'axisSymmetricFilm'
+                for i = 2:length(h) - 1
+                    Pressure(i,saver) = -(h(i+1) - 2*h(i) + h(i-1))/deltaX^2 + 1/h(i)^3;
+                end                  
+        end
 %         minH_cutOff(:,saver) = min(h(:));
 %         if minH_cutOff(:,saver-1) - minH_cutOff(:,saver) <= 1e-12;
 %             break;
@@ -197,14 +231,21 @@ for i = 1:length(t_range)      % time marching
         case 'axisSymmetricFilm'
             [h_right_avg_j(i) x_dimple_loc_right(i) h_right(i) x_right(i)] = spatialResolution_filmThickness(x,h,t,res_limit, deltaX);
             h_avg(i) =  mean(h(1:length(L_flat)));
-            if h_avg(i) <= cutOff_thickness || h_right_avg_j(i) <= cutOff_thickness || min(h(:)) <= 1.05*vdW_repulsion || min(h(:)) <= 1.01*eq_thickness_EDL_vdW || min(h(:)) <= cutOff_thickness
+            if h_avg(i) <= cutOff_thickness(end) || h_right_avg_j(i) <= cutOff_thickness(end) || min(h(:)) <= 1.05*vdW_repulsion || min(h(:)) <= 1.01*eq_thickness_EDL_vdW || min(h(:)) <= cutOff_thickness(end)
                 h_store(:,saver) = h;
                 t_store(saver) = t;
                 break              % if the film height goes below a certain height stop the realization
             else
                 continue
             end
-
+        case {'finiteSizedNonFlatFilms2D','semiInfiniteNonFlatFilms', 'flatFilms_PBC'}
+            if  min(h(:)) <= cutOff_thickness(end)
+                h_store(:,saver) = h;
+                t_store(saver) = t;
+                break              % if the film height goes below a certain height stop the realization
+            else
+                continue
+            end
     end
 %     if min(h(:)) <= cutOff_thickness
 % %         dlmwrite(sprintf('Data_%1.15f.txt',t),h,'precision','%.16f','delimiter','\t')      % write the last file because it becomes important especially for high kappa values in the late regime
@@ -223,6 +264,9 @@ for i = 1:length(t_range)      % time marching
 %     end
 end
 
+% Press = [Pres' Pressure];
+Press = [Pres'];
+
 t_store(t_store == 0) = [];
 h_store(h_store == 0) = [];
 h_store = reshape(h_store,length(h), length(t_store));
@@ -235,7 +279,7 @@ t_rupt = t;                     % rupture time obtained from this simulation
 x_min = x(idx);
 x_rupt = x_min(end);
 
-save('hData.mat','h_store','t_store','minH', 'x_min', 't_rupt', 'x_rupt','-v7.3');
+save('hData.mat','h_store','t_store','minH', 'x_min', 't_rupt', 'x_rupt', 'Press', '-v7.3');
 
 toc
 

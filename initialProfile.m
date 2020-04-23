@@ -100,12 +100,12 @@ switch filmConfiguration
             CurvedPortion = (L_flat + deltaX):deltaX:(L_flat + L_curv + deltaX);
         end
         x = [FlatPortion CurvedPortion];
-        hFlat = ones(size(FlatPortion))*1;
+        hFlat = 1.*ones(size(FlatPortion))*1;
         switch correctionLP_switch
             case 'on'
-                hCurv = 1 + (CurvedPortion.^2 - L_flat.^2)./4.*1./(1 - R_f.^2./Rc.^2) + L_flat^2/2.*log(L_flat./CurvedPortion).*1./(1 - R_f.^2./Rc.^2);
+                hCurv = 1/2 + (CurvedPortion.^2 - L_flat.^2)./4.*1./(1 - R_f.^2./Rc.^2) + L_flat^2/2.*log(L_flat./CurvedPortion).*1./(1 - R_f.^2./Rc.^2);
             case 'off'
-                hCurv = 1 + (CurvedPortion.^2 - L_flat.^2)./4 + L_flat^2/2.*log(L_flat./CurvedPortion);
+                hCurv = 2.*(1/2 + (CurvedPortion.^2 - L_flat.^2)./8 + L_flat^2/4.*log(L_flat./CurvedPortion));
         end
         h = [hFlat hCurv];
       

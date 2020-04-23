@@ -245,13 +245,13 @@ switch filmConfiguration
         switch ExpOrPar
             case 'experimental'
 
-%                 R_film =  [40 50 60 65 70 75 80 85 90 100 115 150 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 2000 3000 4000];   % radius of the film
+%                 R_film =  [40 50 60 65 70 75 80 85 90 100 115 150 200 300 400 500 600 700 800 900 1000 1500 2000 3000 4000];   % radius of the film
 %                 R_film = [900 1000 1100 1200 1300 1400 1500 2000 3000 4000];
 %                 R_film = [40 50 80 100 150 200 300 400 800 2000 4000];
-                R_film = [50];
+                R_film = [4000];
 
                 R_f = R_film.*10^-6;                            % in m
-                h0_init = 300e-9;                               % initial film height in m
+                h0_init = 2000e-9;                               % initial film height in m
                 A_vw = 1.5e-20;                                % Hamaker constant
                 gam = 0.0445;                                    % surface tension
                 Rc = 1.8e-3;                                    % radius of capillary
@@ -261,9 +261,9 @@ switch filmConfiguration
 
                 %% derived quantities from above 
 
-                l_scale = sqrt(Rc*h0_init/2);                   % length scale of the system - obtained from the O(1) scaling
+                l_scale = sqrt(Rc*h0_init/4);                   % length scale of the system - obtained from the O(1) scaling
                 kappa = pi*h0_init^3*gam/A_vw/Rc;               % dimensionless curvature - the free parameter of the system
-                t_scale = 3*visc*Rc^2/(gam*h0_init);            % time scale of the system
+                t_scale = 3*visc*Rc^2/(2*gam*h0_init);            % time scale of the system
 
                 %% drainage time start and end, critical thinning rates start and end, Joye's thinning rate start and end
 
@@ -283,7 +283,7 @@ switch filmConfiguration
                 deltaX = 0.05*ones(size(R_f));             % grid size (tested for grid independent results
                 L_flat = round(R_f./l_scale,1);            % length of the flat film 
                 N_flat = round(L_flat./deltaX);            % number of grid points in the same
-                ctimestep = 2.5;                           % exponent used in deciding deltaT = deltaX^c --> although c = 2.75 suffices, but a higher temp resolution enables more time stamps
+                ctimestep = 2.25;                           % exponent used in deciding deltaT = deltaX^c --> although c = 2.75 suffices, but a higher temp resolution enables more time stamps
                 seN = 100;                                 % save every seN time steps
 
                 for i = 1:length(N_flat)
@@ -299,7 +299,7 @@ switch filmConfiguration
                 upperLimitOnL_curv = sqrt(2*Rc/h0_init) + sqrt(2*Rc/h0_init - L_flat.^2);
                 lowerLimitOnL_curv = sqrt(h0_init*Rc)./l_scale;
 %                 transitionLength = lowerLimitOnL_curv;
-                transitionLength = 1.4;
+                transitionLength = 2;
                 L_curv = 10*lowerLimitOnL_curv;                       % length of the curved portion of the film, for kappa > 1, one needs a smaller value of of L_curv
                 endTime = 6000;
 
@@ -307,19 +307,19 @@ switch filmConfiguration
                 for i = 1:length(R_film)
                     if R_film(i) < 50
                         ctimestep(i) = 2.0;
-                        seN(i) = 50.0;                            % save every these many time steps
+                        seN(i) = 20.0;                            % save every these many time steps
                         animationSkip(i) = 10;                 % save animation every these many time steps
                     elseif R_film(i) >= 50 && R_film(i) <= 100
                         ctimestep(i) = 2.0;
-                        seN(i) = 2;                            % save every these many time steps
+                        seN(i) = 20;                            % save every these many time steps
                         animationSkip(i) = 10;                  % save animation every these many time steps      
                     elseif R_film(i) >= 900
                         ctimestep(i) = 2.0;
                         seN(i) = 20;                            % save every these many time steps
                         animationSkip(i) = 200; 
-                    elseif R_film(i) == 100000 || R_film(i) == 50000 
+                    elseif R_film(i) == 4000 || R_film(i) == 50000 
                         ctimestep(i) = 2.0;
-                        seN(i) = 200;                            % save every these many time steps
+                        seN(i) = 20;                            % save every these many time steps
                         animationSkip(i) = 200; 
                     else
                         ctimestep(i) = 2.0;
@@ -389,8 +389,8 @@ switch filmConfiguration
                         c2 = 0;
                         c3 = 0;
                         eq_thickness_EDL_vdW = 0;
-                        mk = strcat('Unadj_CP_h0_',num2str(h0_init*10^9),'nm','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc), ...
-                                        '_100_25nm','_c1_',num2str(c1),'_c2_',num2str(c2),'_Jan14th_IC1_finer');
+                        mk = strcat('h0_',num2str(h0_init*10^9),'nm','_Avw_',num2str(A_vw),'_ST_',num2str(gam),'_Rc_',num2str(Rc), ...
+                                        '_100_25nm','_c1_',num2str(c1),'_c2_',num2str(c2),'clr_One');
                         mkdir(mk);
                         cd(mk);
                         copyfile('../../../../*.m', '.');
@@ -454,7 +454,7 @@ switch filmConfiguration
                     copyfile('*.m', destinatn);
                     run_mainFiles{i} = strcat('./',num2str(str1{i}));
                     cd(run_mainFiles{i});
-                    [t_rupt(i) drainageTime{i} drainageTime_right{i} drainageTime_right_rupt{i} ...
+                    [t_rupt(i) drainageTime{i} drainageTime_right{i} drainageTime_right_rupt{i}, ...
                     avg_cr_thinningRate_fit(i) h_cr_final(:,i) h_cr_final_FullFilmavg(:,i) R_film_final(i) Press{i} vol_end(i) area_end(i) ...
                     ratio_vol(i) ratio_area(i) t_series_rel{i} h_fit_MTR{i} bb(:,i) h_c_tr(:,i)] = main_axisSymmetryFilm(filmConfiguration, disjPress_switch, correctionLP_switch, ...
                                 R_f(i), h0_init, A_vw, c1, c2, c3, gam, Rc, visc, L_flat(i), N_flat(i), deltaX(i), deltaT(i), transitionLength, h_drain_start,...
@@ -466,11 +466,13 @@ switch filmConfiguration
                     fileToBeSaved = strcat('workspace_','Rf_',num2str(min(R_film)),'_to_',num2str(max(R_film)),'.mat');
                     save(fileToBeSaved)
                 end
-                save(strcat('results_differentFilmSize_diffThinnRates',num2str(R_f),'.mat'))
+%                 save(strcat('results_differentFilmSize_diffThinnRates',num2str(R_f),'.mat'))
+                close all;
+                save(strcat('results_differentFilmSize_diffThinnRates_04','.mat'))
 
                 %% post process finite sized films
 
-%                 postProcessFiniteSizedFilms();
+                postProcessFiniteSizedFilms();
             case 'parametric'
                 mkdir(ExpOrPar)
                 cd(ExpOrPar)

@@ -8,8 +8,8 @@ function [t_rupt drainageTime drainageTime_right drainageTime_right_rupt ...
 
 %% derived quantities (have also been derived in the input file)
 kappa = pi*h0_init^3*gam/A_vw/Rc;
-t_scale = 3*visc*Rc^2/(gam*h0_init);
-l_scale = sqrt(Rc*h0_init/2);
+t_scale = 3*visc*Rc^2/(2*gam*h0_init);
+l_scale = sqrt(Rc*h0_init/4);
 t_cr = t_cr_dimensional./t_scale;
 repulsion_coeff = c1;
 repulsion_expon = c2;

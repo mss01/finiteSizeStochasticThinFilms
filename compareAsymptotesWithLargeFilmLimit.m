@@ -6,7 +6,7 @@ set(groot, 'defaultAxesTickLabelInterpreter','latex');
 set(groot, 'defaultLegendInterpreter','latex');
 set(0,'defaulttextInterpreter','latex');
 
-h0 = [1.5e-7 3e-7 5e-7 1e-6 2e-6];
+h0 = [3e-7 5e-7 1e-6 2e-6];
 gam = 0.0445;
 A_vw = 1.5e-20;
 Rc = 1.8e-3;
@@ -15,19 +15,41 @@ kappa = pi*h0.^3*gam./(A_vw*Rc);
 
 %% relevant time scales 
 
-t_scale_smallFilm = 3*visc/gam*(Rc^2./h0);
+t_scale_smallFilm = 3/2*visc/gam*(Rc^2./h0);
 t_scale_largeFilm_semiInfFilms = 12*pi^2*gam*visc*h0.^5/A_vw^2;
 
 %% dimensionless rupture times from axisymmetric simulations
-% t_r = [69.47 177.78 680.36 2000];
-t_r = [20.46 70.84 184.065 730.13 3058.8];
+t_r = [22.87 35.74 71.28 150.48];
+% t_r = [20.46 70.84 184.065 730.13 3058.8];
 
 % making it dimensional
-t_r_dimensional = t_r.*t_scale_smallFilm;
+t_r_dimensionless = t_r./t_scale_smallFilm;
+
+t_r_model = 6.32.*kappa.^(4/7)
+
+hfig10 = figure;
+hfig10.Renderer = 'Painters';
+
+loglog(kappa, t_r_model, '-')
+hold on
+loglog(kappa, t_r_dimensionless, 'o')
+ylim([50 5000])
+xlabel('$\kappa$ (-)','Fontsize',18)
+ylabel('$\tilde{t}_r$ (-)','Fontsize',18)
+set(gca,'FontSize',18)
+
+set(hfig10,'Units','Inches');
+pos = get(hfig10,'Position');
+set(hfig10,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
+print(hfig10,'fig10','-dpdf','-r300')
+
+%%
+
+
 
 % converting it to equivalent dimensionless rupture times for semi-infinite
 % films
-t_r_LargeFilmLimit = t_r_dimensional./t_scale_largeFilm_semiInfFilms;
+t_r_LargeFilmLimit = t_r./t_scale_largeFilm_semiInfFilms;
 
 %% dimensional rupture times if \tilde{t}_r = kappa^(-10/7) for axissym case
 
@@ -41,8 +63,8 @@ t_r_adjusted = 1.05*12*pi^(4/7)*visc*gam^(-3/7).*h0.^(5/7)./(A_vw^(4/7)*Rc^(-10/
 t_r_largeFilm = 3.92./(1 + 3.74*kappa.^(10/7));
 % t_r_largeFilm_sim = [0.000596 0.000069499947 0.000003375929 7.1859e-08];
 
-ratio_dimensional = t_r_dimensional./t_r_adjusted
-ratio_dimensionless = t_r_LargeFilmLimit./t_r_largeFilm
+% ratio_dimensional = t_r_dimensional./t_r_adjusted
+% ratio_dimensionless = t_r_LargeFilmLimit./t_r_largeFilm
 
 
 hfig0 = figure;
@@ -62,11 +84,11 @@ print(hfig0,'largeFilmLimit','-dpdf','-r300')
 hfig = figure;
 hfig.Renderer = 'Painters';
 
-loglog(kappa, t_r_dimensional, 'o')
+loglog(kappa, t_r_dimensionless, 'o')
 % hold on
 % loglog(kappa, t_r_largeFilm_sim, '+')
 hold on
-loglog(kappa, t_r_adjusted)
+loglog(kappa, t_r_reAdjusted)
 xlabel('$h_o$ [-]','Fontsize',18)
 ylabel('$t_r$ [-]','Fontsize',18)
 set(gca,'FontSize',18)

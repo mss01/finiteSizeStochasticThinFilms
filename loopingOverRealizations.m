@@ -14,7 +14,7 @@ set(0,'defaulttextInterpreter','latex');
 % textFiles = dir([str1]);
 % a   = cellfun(@num2str, struct2cell(textFiles), 'UniformOutput', false);
 % Out = sortrows(a.',6);
-load('realization1\hData.mat');
+load('realization1/hData.mat');
 b = length(t_store);
 t = t_store;                    % corresponds to each time step, including the initial time step                    
 

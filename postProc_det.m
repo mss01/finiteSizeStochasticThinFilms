@@ -37,56 +37,56 @@ t_store_new = [0 t_store];
 
 %%
 
-% hfig01 = figure;
-% hfig01.Renderer = 'Painters';
-% 
-% idxTimeStamp = findTimeSeriesBy2(t_store);
-% 
-% for i = 1:length(idxTimeStamp)
-%     dummy_01(:,i) = h_store_new(:, idxTimeStamp(i));
-%     dummy(:,i) = vertcat(dummy_01(1,i), dummy_01(:,i));
-%     x_dummy = [0; x];
-%     plot(x_dummy*l_scale*10^6, dummy(:,i)*h0_init*10^9,'Linewidth',1, 'color', 'k', 'LineStyle', '-'); % [0.929 0.694 0.125] yellow; [0.85 0.325 0.098] red; 
-% %   [0 0.447 0.741] blue
-% %     ylim([0 1.5*h0_init*10^9]);
-% %     ylim([0 400]);
-%     ylim([0 600]);
-% %     xlim([0 L_flat*l_scale*10^6 + 40]);
-% %     xlim([0 80]);
-%     xlim([0 125]);
+hfig01 = figure;
+hfig01.Renderer = 'Painters';
+
+idxTimeStamp = findTimeSeriesBy2(t_store);
+
+for i = 1:length(idxTimeStamp)
+    dummy_01(:,i) = h_store_new(:, idxTimeStamp(i));
+    dummy(:,i) = vertcat(dummy_01(1,i), dummy_01(:,i));
+    x_dummy = [0; x];
+    plot(x_dummy*l_scale*10^6, dummy(:,i)*h0_init*10^9,'Linewidth',1, 'color', 'k', 'LineStyle', '-'); % [0.929 0.694 0.125] yellow; [0.85 0.325 0.098] red; 
+%   [0 0.447 0.741] blue
+%     ylim([0 1.5*h0_init*10^9]);
+    ylim([0 3000]);
+%     ylim([0 1.5*h0_init*10^9]);
+%     xlim([0 L_flat*l_scale*10^6 + 40]);
+    xlim([0 650]);
+%     xlim([0 L_flat*l_scale*10^6+100]);
 %     daspect([0.1 1 1])
-%     hold on
-% end
-% % breakxaxis([50 950]);  % for h0 = 2000 nm and Rfilm = 4000 mu m
-% % breakxaxis([20 3550]);  % for h0 = 300 nm and Rfilm = 4000 mu m
-% 
-% xlabel('$r$ ($\mu$m)','Fontsize',16)
-% ylabel('$h$ (nm)','Fontsize',16)
-% set(gca,'XTick',[0 25 50 75 100 125]);
-% set(gca,'YTick',[0 100 200 300 400]);
-% set(gca,'FontSize',16)
-% 
-% set(hfig01,'Units','Inches');
-% pos = get(hfig01,'Position');
-% set(hfig01,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
-% print(hfig01,'heightProfiles_successiveDivideBy2','-dpdf','-r300')
-% savefig('heightProfiles_successiveDivideBy2')
-% 
-% ylim([0 4*h0_init*10^9]);
-% xlim([0 L_flat*l_scale*10^6 + 100]);
-% % ylim([0 4000]);
-% % xlim([0 200]);
-% 
-% xlabel('$r$ ($\mu$m)','Fontsize',14)
-% ylabel('$h$ (nm)','Fontsize',14)
-% % set(gca,'XTick',[0 50 100 150 200]);
-% set(gca,'FontSize',14)
-% 
-% set(hfig01,'Units','Inches');
-% pos = get(hfig01,'Position');
-% set(hfig01,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
-% print(hfig01,'heightProfiles_successiveDivideBy2_yRangeLarge','-dpdf','-r300')
-% savefig('heightProfiles_successiveDivideBy2_yRangeLarge')
+    hold on
+end
+% breakxaxis([50 950]);  % for h0 = 2000 nm and Rfilm = 4000 mu m
+% breakxaxis([20 3550]);  % for h0 = 300 nm and Rfilm = 4000 mu m
+
+xlabel('$r$ ($\mu$m)','Fontsize',16)
+ylabel('$h$ (nm)','Fontsize',16)
+set(gca,'XTick',[0 200 400 600]);
+% set(gca,'YTick',[0 100 200 300]);
+set(gca,'FontSize',16)
+
+set(hfig01,'Units','Inches');
+pos = get(hfig01,'Position');
+set(hfig01,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
+print(hfig01,'heightProfiles_successiveDivideBy2','-dpdf','-r300')
+savefig('heightProfiles_successiveDivideBy2')
+
+ylim([0 4*h0_init*10^9]);
+xlim([0 L_flat*l_scale*10^6 + 100]);
+% ylim([0 4000]);
+% xlim([0 200]);
+
+xlabel('$r$ ($\mu$m)','Fontsize',14)
+ylabel('$h$ (nm)','Fontsize',14)
+% set(gca,'XTick',[0 50 100 150 200]);
+set(gca,'FontSize',14)
+
+set(hfig01,'Units','Inches');
+pos = get(hfig01,'Position');
+set(hfig01,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
+print(hfig01,'heightProfiles_successiveDivideBy2_yRangeLarge','-dpdf','-r300')
+savefig('heightProfiles_successiveDivideBy2_yRangeLarge')
 
 
 %% calculate pressure along the film
@@ -218,7 +218,7 @@ close all;
 save('workspace_deterministic_t_cr.mat')
 save('lastFrame01.mat','x','h_store','t_store','l_scale','t_scale','h0_init', 'R_film_final', 'R_f', 'h_centre_j')
 
-makeAnimation_det(filmConfiguration, correctionLP_switch, animationSkip,kappa, L_flat, L_curv, R_f, Rc, transitionLength,deltaX, h_store, t_store, h0_init, t_scale, l_scale, beginDrainageTime_right, endDrainageTime_right, x_dimple_loc_right, res_limit, h_drain_start, h_drain_end);
+% makeAnimation_det(filmConfiguration, correctionLP_switch, animationSkip,kappa, L_flat, L_curv, R_f, Rc, transitionLength,deltaX, h_store, t_store, h0_init, t_scale, l_scale, beginDrainageTime_right, endDrainageTime_right, x_dimple_loc_right, res_limit, h_drain_start, h_drain_end);
 % makeAnimation_det(filmConfiguration, correctionLP_switch, animationSkip,kappa, L_flat, L_curv, R_f, Rc, transitionLength,deltaX, h_store, t_store, h0_init, t_scale, l_scale, beginDrainageTime_right, endDrainageTime_right, x_dimple_loc_right, res_limit, h_drain_start, h_drain_end);
 
 toc
